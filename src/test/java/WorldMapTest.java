@@ -1,3 +1,5 @@
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class WorldMapTest {
@@ -85,5 +87,40 @@ class WorldMapTest {
         testMap.placeMapElement(experimentalRabbit7);
         testMap.placeMapElement(experimentalRabbit8);
         assertTrue(testMap.isAnyAdjacentPositionFree(new Vector2D(2,2)));
+    }
+
+    @Test
+    public void placeMapElementShouldPlaceAPlantOnTheMap(){
+        WorldMap testMap = new WorldMap(4,4,0.5,2);
+        Plant testPlant = new Plant(new Vector2D(0,0));
+        testMap.placeMapElement(testPlant);
+        assertEquals(testPlant, testMap.getEnvironmentElements().get(testPlant.getPosition()));
+    }
+
+    @Test
+    public void placeMapElementShouldPlaceAnAnimalOnTheMap(){
+        WorldMap testMap = new WorldMap(4,4,0.5,2);
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
+        testMap.placeMapElement(experimentalRabbit1);
+        assertEquals(experimentalRabbit1, testMap.getAnimals().get(experimentalRabbit1.getPosition()).get(0));
+    }
+
+    @Test
+    public void isOccupiedShouldReturnTrueIfThePlaceIsOccupied(){
+        WorldMap testMap = new WorldMap(4,4,0.5,2);
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
+        testMap.placeMapElement(experimentalRabbit1);
+        assertTrue(testMap.isOccupied(new Vector2D(1,1)));
+    }
+
+    @Test
+    public void isOccupiedByLivingEntityShouldReturnTrueIfThePlaceIsOccupiedByAnAnimal(){
+        WorldMap testMap = new WorldMap(4,4,0.5,2);
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
+        testMap.placeMapElement(experimentalRabbit1);
+        assertTrue(testMap.isOccupiedByLivingEntity(new Vector2D(1,1)));
     }
 }

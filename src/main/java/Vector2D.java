@@ -34,4 +34,8 @@ public class Vector2D {
     public boolean follows(Vector2D other){ //analogicznie nastepnik
         return this.x >= other.x && this.y >= other.y;
     }
+
+    public boolean equals(Vector2D other){
+        return this.x == other.getX() && this.y == other.getY();
+    }
 }

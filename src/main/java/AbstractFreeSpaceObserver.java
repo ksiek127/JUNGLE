@@ -22,4 +22,12 @@ public abstract class AbstractFreeSpaceObserver {
     public Boolean isFreeSpace(){
         return freeSpace.size() > 0;
     }
+
+    public Boolean isTheSpaceFree(Vector2D position){
+        for(Vector2D space: freeSpace){
+            if(space.equals(position))
+                return true;
+        }
+        return false;
+    }
 }

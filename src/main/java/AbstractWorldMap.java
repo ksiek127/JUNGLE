@@ -30,15 +30,15 @@ public abstract class AbstractWorldMap implements IWorldMap{
     @Override
     public void placeMapElement(IMapElement element){ //dodaje do elementow na mapie
         if(element.getIsEnvironmentElement()){ //jesli to jest element otoczenia (trawa)
-            if(grassObserver.getFreeSpace().contains(element.getPosition())) {
+            if(grassObserver.isTheSpaceFree(element.getPosition())) {
                 mapElements.put(element.getPosition(), new ArrayList<IMapElement>());
                 mapElements.get(element.getPosition()).add(element);
                 grassObserver.removeSpace(element.getPosition());
                 //dodaje do elementow otoczenia
                 environmentElements.put(element.getPosition(), element);
             }
-        }else{ //jesli to jest zwierze
-            if(animalsObserver.getFreeSpace().contains(element.getPosition())){
+        }if(!element.getIsEnvironmentElement()){ //jesli to jest zwierze
+            if(animalsObserver.isTheSpaceFree(element.getPosition())){
                 mapElements.put(element.getPosition(), new ArrayList<IMapElement>());
                 mapElements.get(element.getPosition()).add(element);
                 grassObserver.removeSpace(element.getPosition());
