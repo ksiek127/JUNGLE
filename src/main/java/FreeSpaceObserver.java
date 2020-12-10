@@ -1,10 +1,15 @@
 import java.util.ArrayList;
 
-public abstract class AbstractFreeSpaceObserver {
+public class FreeSpaceObserver {
     protected final ArrayList<Vector2D> freeSpace; //lista wolnych miejsc
 
-    public AbstractFreeSpaceObserver(){
+    public FreeSpaceObserver(int mapWidth, int mapHeight){
         freeSpace = new ArrayList<>();
+        for(int i=0; i< mapWidth; i++){ //dodaje wszystkie wolne miejsca do listy
+            for(int j=0; j< mapHeight; j++){
+                freeSpace.add(new Vector2D(i, j));
+            }
+        }
     }
 
     public void addSpace(Vector2D position){
@@ -12,7 +17,12 @@ public abstract class AbstractFreeSpaceObserver {
     }
 
     public void removeSpace(Vector2D position){
-        freeSpace.remove(position);
+        for(Vector2D space: freeSpace){
+            if(space.equals(position)){
+                freeSpace.remove(space);
+                return;
+            }
+        }
     }
 
     public ArrayList<Vector2D> getFreeSpace() {

@@ -1,12 +1,17 @@
 import java.util.*;
 
-public class WorldMap extends AbstractWorldMap implements IWorldMap{
+public class WorldMap implements IWorldMap{
     private final int width; //szerokosc mapy
     private final int height; //wysokosc mapy
     private final double jungleRatio; //proporcje dzungli do sawanny
     private final int plantEnergy; //ilosc energii dodawana po zjedzeniu rosliny
     private final Vector2D jgBottomLeft; //lewy dolny rog dzungli
     private final Vector2D jgTopRight; //prawy gorny rog dzungli
+    private final LinkedHashMap<Vector2D, ArrayList<Animal>> animals = new LinkedHashMap<>(); //lista zwierzat
+    private final LinkedHashMap<Vector2D, IMapElement> environmentElements = new LinkedHashMap<>(); //lista roslin
+    private final LinkedHashMap<Vector2D, ArrayList<IMapElement>> mapElements = new LinkedHashMap<>(); //lista wszystkich obiektow na mapie
+    private final FreeSpaceObserver grassObserver;
+    private final FreeSpaceObserver animalsObserver;
 
     public WorldMap(int width, int height, double jungleRatio, int plantEnergy) {
         this.width = width;
@@ -15,8 +20,8 @@ public class WorldMap extends AbstractWorldMap implements IWorldMap{
         this.plantEnergy = plantEnergy;
         this.jgBottomLeft = new Vector2D((int) (width * (1 - jungleRatio) / 2), (int) (height * (1 - jungleRatio) / 2));
         this.jgTopRight = new Vector2D((int) (width * (1 - jungleRatio) / 2), (int) (height * (1 - jungleRatio) / 2));
-        grassObserver = new FreeSpaceForGrassObserver(this);
-        animalsObserver = new FreeSpaceForAnimalsObserver(this);
+        grassObserver = new FreeSpaceObserver(width, height);
+        animalsObserver = new FreeSpaceObserver(width, height);
     }
 
     @Override
@@ -51,10 +56,8 @@ public class WorldMap extends AbstractWorldMap implements IWorldMap{
     public boolean isAnyAdjacentPositionFree(Vector2D position){
         for(int i=position.getX() - 1; i <= position.getX() + 2; i++){
             for(int j=position.getY() - 1; j <= position.getY() + 2; j++){
-                if(i != position.getX() && j != position.getY()){ //sprawdzam sasiednie pola, bez tego, na ktorym stoje
-                    if(!isOccupiedByLivingEntity(new Vector2D(i % width, j % height))) //modulo, bo brzegi mapy zawijaja sie na druga strone
-                        return true;
-                }
+                if(animalsObserver.isTheSpaceFree(new Vector2D(i, j)))
+                    return true;
             }
         }
         return false;
@@ -197,5 +200,74 @@ public class WorldMap extends AbstractWorldMap implements IWorldMap{
             IMapElement plant = new Plant(plantPos); //umieszczam rosline na mapie
             placeMapElement(plant);
         }
+    }
+
+    @Override
+    public LinkedHashMap<Vector2D, ArrayList<Animal>> getAnimals() { //zwracam kopie zwierzakow
+        return new LinkedHashMap<>(animals);
+    }
+
+    public Collection<ArrayList<Animal>> getAnimalsList() { //zwracam kopie zwierzakow
+        return animals.values();
+    }
+
+    public LinkedHashMap<Vector2D, IMapElement> getEnvironmentElements() { //zwraca kopie roslin
+        return new LinkedHashMap<>(environmentElements);
+    }
+
+    public ArrayList<IMapElement> getEnvironmentElementsList() { //zwraca kopie roslin
+        return (ArrayList<IMapElement>) environmentElements.values();
+    }
+
+    @Override
+    public void placeMapElement(IMapElement element){ //dodaje do elementow na mapie
+        if(element.getIsEnvironmentElement()){ //jesli to jest element otoczenia (trawa)
+            if (grassObserver.isTheSpaceFree(element.getPosition())) {
+                mapElements.put(element.getPosition(), new ArrayList<IMapElement>());
+                mapElements.get(element.getPosition()).add(element);
+                grassObserver.removeSpace(element.getPosition());
+                //dodaje do elementow otoczenia
+                environmentElements.put(element.getPosition(), element);
+            }
+        }if(!element.getIsEnvironmentElement()){ //jesli to jest zwierze
+            if (!animalsObserver.isTheSpaceFree(element.getPosition())) {
+                return;
+            }
+            mapElements.put(element.getPosition(), new ArrayList<IMapElement>());
+            mapElements.get(element.getPosition()).add(element);
+            grassObserver.removeSpace(element.getPosition());
+            animalsObserver.removeSpace(element.getPosition());
+            //dodaje do zwierzakow na mapie
+            if(!animals.containsKey(element.getPosition())){ //jesli tam nie ma innych zwierzat
+                animals.put(element.getPosition(), new ArrayList<Animal>());
+            }
+            animals.get(element.getPosition()).add((Animal) element);
+        }
+    }
+
+    @Override
+    public boolean isOccupied(Vector2D position){
+        for(Vector2D space: grassObserver.getFreeSpace()){ //sprawdzam, czy dane miejsce jest wolne
+            if(space.equals(position)) //jesli jest wolne, to zwracam false (bo nie jest zajete)
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isOccupiedByLivingEntity(Vector2D position) {
+        for(Vector2D space: animalsObserver.getFreeSpace()){ //sprawdzam, czy dane miejsce jest wolne
+            if(space.equals(position)) //jesli jest wolne, to zwracam false (bo nie jest zajete)
+                return false;
+        }
+        return true;
+    }
+
+    public FreeSpaceObserver getGrassObserver() {
+        return grassObserver;
+    }
+
+    public FreeSpaceObserver getAnimalsObserver() {
+        return animalsObserver;
     }
 }

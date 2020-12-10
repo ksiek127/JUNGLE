@@ -22,6 +22,7 @@ public class World {
             JFrame menuFrame = new JFrame();
             menu.setSize(parameters.getWidth(), parameters.getHeight());
             menuFrame.add(new ConfigPanel(parameters));
+            menu.setLocationRelativeTo(null);
             menuFrame.setVisible(true);
         }catch (IllegalArgumentException e){
             System.out.println(e);

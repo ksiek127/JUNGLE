@@ -49,6 +49,7 @@ public class Simulation implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        displayPanel.repaint();
         Collection<ArrayList<Animal>> animalsList = map.getAnimals().values();
         ArrayList<Animal> animals = new ArrayList<>(); //lista wszystkich zwierzat
         for(ArrayList<Animal> animalList: animalsList){
@@ -71,5 +72,9 @@ public class Simulation implements ActionListener {
         //dodanie nowych roslin do mapy
         map.spawnPlants();
         era++; //nowa epoka
+    }
+
+    public JFrame getFrame() {
+        return frame;
     }
 }

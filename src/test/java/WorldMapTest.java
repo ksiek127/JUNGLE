@@ -55,6 +55,7 @@ class WorldMapTest {
         Animal experimentalRabbit6 = new Animal(testMap, new Vector2D(3,2), genes, 30);
         Animal experimentalRabbit7 = new Animal(testMap, new Vector2D(2,3), genes, 30);
         Animal experimentalRabbit8 = new Animal(testMap, new Vector2D(3,3), genes, 30);
+        Animal experimentalRabbit9 = new Animal(testMap, new Vector2D(2,2), genes, 30);
         testMap.placeMapElement(experimentalRabbit1);
         testMap.placeMapElement(experimentalRabbit2);
         testMap.placeMapElement(experimentalRabbit3);
@@ -63,6 +64,7 @@ class WorldMapTest {
         testMap.placeMapElement(experimentalRabbit6);
         testMap.placeMapElement(experimentalRabbit7);
         testMap.placeMapElement(experimentalRabbit8);
+        testMap.placeMapElement(experimentalRabbit9);
         assertFalse(testMap.isAnyAdjacentPositionFree(new Vector2D(2,2)));
     }
 

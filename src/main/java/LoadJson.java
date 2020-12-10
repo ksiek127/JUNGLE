@@ -65,7 +65,8 @@ public class LoadJson {
         return plantEnergy;
     }
 
-    public double getJungleRatio() {
+    public double
+    getJungleRatio() {
         return jungleRatio;
     }
 
