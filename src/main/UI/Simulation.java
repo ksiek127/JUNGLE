@@ -40,7 +40,9 @@ public class Simulation implements ActionListener {
             for(int j=0; j<32; j++)
                 genes[j] = (byte)random.nextInt(8);
             Animal animal = new Animal(map, new Vector2D(random.nextInt(map.getWidth()), random.nextInt(map.getHeight())), genes, startEnergy);
-            animal.fixGenes(animal.getGenes());
+            animal.sortGenes();
+            Animal.fixGenes(animal.getGenes());
+            animal.sortGenes();
             while(map.isOccupiedByLivingEntity(animal.getPosition())) //losuje pozycje, dopoki nie trafie na wolne pole
                 animal.setPosition(new Vector2D(random.nextInt(map.getWidth()), random.nextInt(map.getHeight())));
             map.placeMapElement(animal);

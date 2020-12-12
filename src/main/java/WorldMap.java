@@ -216,9 +216,10 @@ public class WorldMap implements IWorldMap{
     }
 
     public ArrayList<IMapElement> getEnvironmentElementsList() { //zwraca kopie roslin
-        return (ArrayList<IMapElement>) environmentElements.values();
+        //return (ArrayList<IMapElement>) environmentElements.values();
+        return new ArrayList<IMapElement>(environmentElements.values());
     }
-
+    
     @Override
     public void placeMapElement(IMapElement element){ //dodaje do elementow na mapie
         if(element.getIsEnvironmentElement()){ //jesli to jest element otoczenia (trawa)

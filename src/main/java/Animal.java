@@ -58,23 +58,27 @@ public class Animal extends AbstractMapElement implements IMapElement{
         move(cost);
     }
 
-    public void fixGenes(byte[] babyGenes){ //przy losowaniu genow zwierzecia, moze ktoregos zabraknac i to jest funkcja, ktora zapewnia, ze nowo powstale zwierze ma co najmniej jeden gen kazdego kierunku
+    public static void fixGenes(byte[] genes){ //przy losowaniu genow zwierzecia, moze ktoregos zabraknac i to jest funkcja, ktora zapewnia, ze nowo powstale zwierze ma co najmniej jeden gen kazdego kierunku
         ArrayList<Integer> duplicateIndices = new ArrayList<>();
         ArrayList<Byte> missingGenes = new ArrayList<>();
-        for(int i=0; i<babyGenes.length - 1; i++){
-            if(babyGenes[i+1] == babyGenes[i])
+        for(int i=0; i<genes.length - 1; i++){
+            if(genes[i+1] == genes[i])
                 duplicateIndices.add(i);
-            if(babyGenes[i+1] - babyGenes[i] > 1){
-                for(byte j = (byte) (babyGenes[i] + 1); j<babyGenes[i+1]; j++)
+            if(genes[i+1] - genes[i] > 1){
+                for(byte j = (byte) (genes[i] + 1); j<genes[i+1]; j++)
                     missingGenes.add(j);
             }
         }
         for (Byte missingGene : missingGenes) {
             Random random = new Random();
             int idx = random.nextInt(duplicateIndices.size()); //losuje indeks duplikatu do wymiany
-            babyGenes[duplicateIndices.get(idx)] = missingGene; //zmieniam na brakujacy gen
+            genes[duplicateIndices.get(idx)] = missingGene; //zmieniam na brakujacy gen
             duplicateIndices.remove(idx); //usuwam z duplikatow
         }
+    }
+
+    public void sortGenes(){
+        Arrays.sort(genes);
     }
 
     public Animal reproduce(Animal other){
@@ -86,10 +90,6 @@ public class Animal extends AbstractMapElement implements IMapElement{
         System.arraycopy(this.genes, 0, babyGenes, 0, split1);
         System.arraycopy(this.genes, split1, babyGenes, split1, split2 - split1);
         System.arraycopy(other.genes, split2, babyGenes, split2, genes.length - split2);
-        //musi byc co najmniej jeden gen kazdego kierunku
-        Arrays.sort(babyGenes);
-        fixGenes(babyGenes);
-        Arrays.sort(babyGenes); //sortuje jeszcze raz, teraz juz jest co najmniej jeden gen kazdego typu
         int babyX = random.nextInt(3) + position.getX() - 1;
         int babyY = random.nextInt(3) + position.getY() - 1;
         Vector2D babyPosition = new Vector2D(babyX, babyY);
@@ -107,7 +107,12 @@ public class Animal extends AbstractMapElement implements IMapElement{
         int babyEnergy = this.energy / 4 + other.energy / 4; //dziecko dostaje energie od rodzicow
         this.loseEnergy(this.energy / 4); //rodzice traca energie na rzecz dziecka
         other.loseEnergy(other.energy / 4);
-        return new Animal(map, babyPosition, babyGenes, babyEnergy);
+        Animal baby = new Animal(map, babyPosition, babyGenes, babyEnergy);
+        //musi byc co najmniej jeden gen kazdego kierunku
+        baby.sortGenes();
+        fixGenes(babyGenes);
+        baby.sortGenes(); //sortuje jeszcze raz, teraz juz jest co najmniej jeden gen kazdego typu
+        return baby;
     }
 
     public void checkIfCanCanBreed(){ //sprawdzam, czy zwierze moze sie rozmnazac tego dnia

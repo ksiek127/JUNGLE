@@ -59,7 +59,7 @@ public class ConfigPanel extends JPanel implements ActionListener {
         delayLabel.setLabelFor(delay);
         start = new JButton("Start");
         start.addActionListener(this);
-        setPreferredSize(new Dimension(parameters.getWidth(), parameters.getHeight()));
+        setPreferredSize(new Dimension(getWidth(), getHeight()));
         width.setColumns(8);
         height.setColumns(8);
         startEnergy.setColumns(8);
@@ -77,28 +77,37 @@ public class ConfigPanel extends JPanel implements ActionListener {
         JPanel nrOfAnimalsInTheBeginningPanel = new JPanel();
         JPanel delayPanel = new JPanel();
         JPanel startPanel = new JPanel();
-        widthPanel.add(width);
         widthPanel.add(widthLabel);
-        heightPanel.add(height);
+        widthPanel.add(width);
         heightPanel.add(heightLabel);
-        startEnergyPanel.add(startEnergy);
+        heightPanel.add(height);
         startEnergyPanel.add(startEnergyLabel);
-        moveEnergyPanel.add(moveEnergy);
+        startEnergyPanel.add(startEnergy);
         moveEnergyPanel.add(moveEnergyLabel);
-        plantEnergyPanel.add(plantEnergy);
+        moveEnergyPanel.add(moveEnergy);
         plantEnergyPanel.add(plantEnergyLabel);
-        jungleRatioPanel.add(jungleRatio);
+        plantEnergyPanel.add(plantEnergy);
         jungleRatioPanel.add(jungleRatioLabel);
-        nrOfAnimalsInTheBeginningPanel.add(nrOfAnimalsInTheBeginning);
+        jungleRatioPanel.add(jungleRatio);
         nrOfAnimalsInTheBeginningPanel.add(nrOfAnimalsInTheBeginningLabel);
-        delayPanel.add(delay);
+        nrOfAnimalsInTheBeginningPanel.add(nrOfAnimalsInTheBeginning);
         delayPanel.add(delayLabel);
+        delayPanel.add(delay);
         startPanel.add(start);
+        add(widthPanel);
+        add(heightPanel);
+        add(startEnergyPanel);
+        add(moveEnergyPanel);
+        add(plantEnergyPanel);
+        add(jungleRatioPanel);
+        add(nrOfAnimalsInTheBeginningPanel);
+        add(delayPanel);
+        add(startPanel);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        WorldMap map = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Integer.parseInt(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
+        WorldMap map = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
         Simulation simulation = new Simulation(map, Integer.parseInt(nrOfAnimalsInTheBeginning.getText()), Integer.parseInt(delay.getText()), Integer.parseInt(startEnergy.getText()));
         simulation.start();
     }

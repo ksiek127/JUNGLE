@@ -14,8 +14,8 @@ public class DisplayPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics graphics){
         super.paintComponent(graphics);
-        this.setSize((int) (simulation.getFrame().getWidth() * 0.7), simulation.getFrame().getHeight());
-        this.setLocation((int) (0.3 * simulation.getFrame().getWidth()), 0);
+        this.setSize((int)(map.getWidth() * 0.6), (int)(map.getHeight() * 0.6));
+        this.setLocation(0, 0);
         graphics.setColor(new Color( 251, 227, 153)); //kolor stepu
         graphics.fillRect(0, 0, getWidth(), getHeight());
         graphics.setColor(new Color(133, 144, 79)); //kolor dzungli

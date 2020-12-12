@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -15,14 +16,14 @@ public class World {
     }
 
     public static void main(String[] args) {
-        JFrame menu = new JFrame();
-
         try{
             LoadJson parameters = LoadJson.loadParameters();
             JFrame menuFrame = new JFrame();
-            menu.setSize(parameters.getWidth(), parameters.getHeight());
+            menuFrame.setPreferredSize(new Dimension(400,400));
+            menuFrame.pack();
             menuFrame.add(new ConfigPanel(parameters));
-            menu.setLocationRelativeTo(null);
+            menuFrame.setLocationRelativeTo(null);
+            menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             menuFrame.setVisible(true);
         }catch (IllegalArgumentException e){
             System.out.println(e);
