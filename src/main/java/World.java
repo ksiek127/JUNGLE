@@ -24,6 +24,7 @@ public class World {
             menuFrame.add(new ConfigPanel(parameters));
             menuFrame.setLocationRelativeTo(null);
             menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            menuFrame.add(new ConfigPanel(parameters));
             menuFrame.setVisible(true);
         }catch (IllegalArgumentException e){
             System.out.println(e);

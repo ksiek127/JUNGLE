@@ -19,7 +19,7 @@ public class WorldMap implements IWorldMap{
         this.jungleRatio = jungleRatio;
         this.plantEnergy = plantEnergy;
         this.jgBottomLeft = new Vector2D((int) (width * (1 - jungleRatio) / 2), (int) (height * (1 - jungleRatio) / 2));
-        this.jgTopRight = new Vector2D((int) (width * (1 - jungleRatio) / 2), (int) (height * (1 - jungleRatio) / 2));
+        this.jgTopRight = new Vector2D((int) (width * (1 - jungleRatio) / 2) + (int) (jungleRatio * width), (int) (height * (1 - jungleRatio) / 2) + (int) (jungleRatio * height));
         grassObserver = new FreeSpaceObserver(width, height);
         animalsObserver = new FreeSpaceObserver(width, height);
     }
@@ -65,8 +65,10 @@ public class WorldMap implements IWorldMap{
 
     public void removeAnimal(Animal animal) { //usuwanie martwego zwierzecia
         Vector2D animalPosition = animal.getPosition();
-        animals.get(animal.getPosition()).remove(animal);
+        animals.get(animalPosition).remove(animal);
+        mapElements.get(animalPosition).remove(animal);
         if (!isOccupied(animalPosition)) { //jesli nie ma tam innych zwierzat, to pole staje sie wolne
+            animals.remove(animalPosition);
             grassObserver.addSpace(animalPosition);
             animalsObserver.addSpace(animalPosition);
         }
@@ -115,12 +117,14 @@ public class WorldMap implements IWorldMap{
                             animal.gainEnergy(maxEnergy / nrOfAnimalsWithMaxEnergy); //jesli jest kilka zwierzat z najwyzsza energia, dziela energie z rosliny miedzy soba
                     }
                 }
+                environmentElements.remove(plant.getPosition()); //usuwam zjedzona rosline z mapy
+                mapElements.get(plant.getPosition()).remove(plant);
             }
         }
     }
 
-    public void breeding(ArrayList<Animal> animals1){
-        for(Animal animal: animals1){ //dla kazdego zwierzaka
+    public void breeding(ArrayList<Animal> animalsArrayList){
+        for(Animal animal: animalsArrayList){ //dla kazdego zwierzaka
             ArrayList<Animal> animalsAtThisPosition = animals.get(animal.getPosition()); //lista zwierzakow na tej pozycji
             if(animalsAtThisPosition.size() > 1){ //musi byc wiecej niz jedno zwierze, zeby sie rozmnazac
                 ArrayList<Animal> capableOfBreeding = new ArrayList<>();
@@ -207,8 +211,12 @@ public class WorldMap implements IWorldMap{
         return new LinkedHashMap<>(animals);
     }
 
-    public Collection<ArrayList<Animal>> getAnimalsList() { //zwracam kopie zwierzakow
-        return animals.values();
+    public ArrayList<Animal> getAnimalsList() { //zwracam kopie zwierzakow
+        ArrayList<Animal> animalsArrayList = new ArrayList<>(); //lista wszystkich zwierzat
+        for(ArrayList<Animal> animalList: animals.values()){
+            animalsArrayList.addAll(animalList);
+        }
+        return animalsArrayList;
     }
 
     public LinkedHashMap<Vector2D, IMapElement> getEnvironmentElements() { //zwraca kopie roslin
@@ -262,6 +270,16 @@ public class WorldMap implements IWorldMap{
                 return false;
         }
         return true;
+    }
+
+    @Override
+    public void moveAnimal(Animal animal, Vector2D oldPosition){ //aktualizuje pozycje zwierzecia na mapie
+        animals.get(oldPosition).remove(animal);
+        animals.computeIfAbsent(animal.getPosition(), k -> new ArrayList<Animal>()); //jesli na tej pozycji nie ma innych zwierzat, dodaje nowa liste
+        animals.get(animal.getPosition()).add(animal);
+        mapElements.get(oldPosition).remove(animal);
+        mapElements.computeIfAbsent(animal.getPosition(), k -> new ArrayList<IMapElement>()); //jesli na tej pozycji nie ma innych zwierzat, dodaje nowa liste
+        mapElements.get(animal.getPosition()).add(animal);
     }
 
     public FreeSpaceObserver getGrassObserver() {

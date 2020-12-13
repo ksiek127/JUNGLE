@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -18,14 +19,20 @@ public class Simulation implements ActionListener {
     private int plantEnergy;
     private int moveEnergy;
     private int era;
+    private Timer timer;
 
-    public Simulation(WorldMap map, int nrOfAnimalsInTheBeginning, int delay, int startEnergy){
+    public Simulation(WorldMap map, int nrOfAnimalsInTheBeginning, int delay, int startEnergy, int plantEnergy, int moveEnergy){
         this.map = map;
         this.nrOfAnimalsInTheBeginning = nrOfAnimalsInTheBeginning;
         this.delay = delay;
         this.startEnergy = startEnergy;
+        this.plantEnergy = plantEnergy;
+        this.moveEnergy = moveEnergy;
+        this.era = 1;
+        this.timer = new Timer(delay, this);
         frame = new JFrame("JUNGLE");
         frame.setSize(map.getWidth(), map.getHeight());
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         displayPanel = new DisplayPanel(map, this);
         displayPanel.setSize(new Dimension(1,1));
@@ -47,21 +54,21 @@ public class Simulation implements ActionListener {
                 animal.setPosition(new Vector2D(random.nextInt(map.getWidth()), random.nextInt(map.getHeight())));
             map.placeMapElement(animal);
         }
+        timer.start();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         displayPanel.repaint();
-        Collection<ArrayList<Animal>> animalsList = map.getAnimals().values();
-        ArrayList<Animal> animals = new ArrayList<>(); //lista wszystkich zwierzat
-        for(ArrayList<Animal> animalList: animalsList){
-            for(Animal animal: animalList)
-                animals.add((Animal) animal);
+        ArrayList<Animal> animals = map.getAnimalsList(); //lista wszystkich zwierzat
+        if(animals.size() == 0){ //jesli nie ma juz zywych zwierzat, koncze symulacje
+            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
         }
         for(Animal animal : animals){ //usuwam martwe zwierzeta z mapy
             if(animal.getIsDead())
                 map.removeAnimal(animal);
         }
+        animals = map.getAnimalsList(); //aktualna lista zwierzat po usunieciu martwych
         for(Animal animal: animals){
             animal.update(moveEnergy); //skret i przemieszczenie
         }

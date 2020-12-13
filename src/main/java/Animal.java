@@ -27,12 +27,14 @@ public class Animal extends AbstractMapElement implements IMapElement{
         Random random = new Random();
         int changeOrientationIdx = random.nextInt(genes.length); //losuje indeks
         byte changeOrientation = genes[changeOrientationIdx]; //zmiana orientacji zgodna z genem o wylosowanym indeksie
-        orientation = Direction.intToDirection(orientation.directionToInt() + changeOrientation);
+        orientation = Direction.intToDirection((orientation.directionToInt() + changeOrientation) % 8);
     }
 
     private void move(int cost){ //wykonanie pojedynczego ruchu
+        Vector2D prevPosition = position;
         this.position = this.position.add(this.orientation.toUnitVector());
         loseEnergy(cost); //utrata energii zuzytej na poruszanie
+        map.moveAnimal(this, prevPosition);
     }
 
     public void gainEnergy(int amount){ //uzyskanie energii

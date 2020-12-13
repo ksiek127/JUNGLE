@@ -14,4 +14,6 @@ public interface IWorldMap {
     LinkedHashMap<Vector2D, ArrayList<Animal>> getAnimals(); //zwraca kopie zwierzat
 
     boolean isAnyAdjacentPositionFree(Vector2D position); //sprawdza, czy jakiekolwiek sasiednie pole jest wolne (tzn, czy nie ma tam zywej istoty, trawa moze byc)
+
+    void moveAnimal(Animal animal, Vector2D oldPosition); //aktualizuje pozycje zwierzecia na mapie
 }

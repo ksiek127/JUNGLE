@@ -23,16 +23,16 @@ public enum Direction {
         };
     }
 
-    public static Direction intToDirection(int dir){ //1 - NORTH
+    public static Direction intToDirection(int dir){ //0 - NORTH
         return switch (dir){
-            case 1 -> NORTH;
-            case 2 -> NORTHEAST;
-            case 3 -> EAST;
-            case 4 -> SOUTHEAST;
-            case 5 -> SOUTH;
-            case 6 -> SOUTHWEST;
-            case 7 -> WEST;
-            case 8 -> NORTHWEST;
+            case 0 -> NORTH;
+            case 1 -> NORTHEAST;
+            case 2 -> EAST;
+            case 3 -> SOUTHEAST;
+            case 4 -> SOUTH;
+            case 5 -> SOUTHWEST;
+            case 6 -> WEST;
+            case 7 -> NORTHWEST;
             default -> throw new IllegalArgumentException();
         };
     }
