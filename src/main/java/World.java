@@ -18,13 +18,13 @@ public class World {
     public static void main(String[] args) {
         try{
             LoadJson parameters = LoadJson.loadParameters();
+            energyRequiredToBreed = (int) (parameters.getStartEnergy() / 2);
             JFrame menuFrame = new JFrame();
-            menuFrame.setPreferredSize(new Dimension(400,400));
+            menuFrame.setPreferredSize(new Dimension(1000,1000));
             menuFrame.pack();
             menuFrame.add(new ConfigPanel(parameters));
             menuFrame.setLocationRelativeTo(null);
             menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            menuFrame.add(new ConfigPanel(parameters));
             menuFrame.setVisible(true);
         }catch (IllegalArgumentException e){
             System.out.println(e);

@@ -3,8 +3,9 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class DisplayPanel extends JPanel {
-    private WorldMap map; //mapa swiata
-    private Simulation simulation;
+    private final WorldMap map; //mapa swiata
+    //private WorldMap secondMap; //druga mapa z identycznymi parametrami jak pierwsza, ale niezaleznie losowanymi decyzjami
+    private final Simulation simulation;
 
     public DisplayPanel(WorldMap map, Simulation simulation){
         this.map = map;
@@ -14,8 +15,9 @@ public class DisplayPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics graphics){
         super.paintComponent(graphics);
+        this.setLayout(null);
         this.setSize(map.getWidth(), map.getHeight());
-        this.setLocation(0, 0);
+        this.setLocation(0,0);
         graphics.setColor(new Color( 251, 227, 153)); //kolor stepu
         graphics.fillRect(0, 0, getWidth(), getHeight());
         graphics.setColor(new Color(133, 144, 79)); //kolor dzungli
@@ -25,7 +27,7 @@ public class DisplayPanel extends JPanel {
             graphics.fillRect(plant.getPosition().getX(), plant.getPosition().getY(), getWidth() / map.getWidth() + 1, (getHeight() / map.getHeight()) + 1);
         }
         for(Animal animal: map.getAnimalsList()){ //wyswietlam zwierzeta
-            graphics.setColor(new Color(0,0,0));
+            graphics.setColor(animal.getColor());
             graphics.fillRect(animal.getPosition().getX(), animal.getPosition().getY(), getWidth() / map.getWidth() + 1, getHeight() / map.getHeight() + 1);
         }
     }

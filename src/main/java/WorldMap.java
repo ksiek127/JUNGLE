@@ -12,6 +12,9 @@ public class WorldMap implements IWorldMap{
     private final LinkedHashMap<Vector2D, ArrayList<IMapElement>> mapElements = new LinkedHashMap<>(); //lista wszystkich obiektow na mapie
     private final FreeSpaceObserver grassObserver;
     private final FreeSpaceObserver animalsObserver;
+    private int totalLongevityForDeadAnimals;
+    private int nrOfDeadAnimals;
+    private int era;
 
     public WorldMap(int width, int height, double jungleRatio, int plantEnergy) {
         this.width = width;
@@ -22,6 +25,9 @@ public class WorldMap implements IWorldMap{
         this.jgTopRight = new Vector2D((int) (width * (1 - jungleRatio) / 2) + (int) (jungleRatio * width), (int) (height * (1 - jungleRatio) / 2) + (int) (jungleRatio * height));
         grassObserver = new FreeSpaceObserver(width, height);
         animalsObserver = new FreeSpaceObserver(width, height);
+        totalLongevityForDeadAnimals = 0;
+        nrOfDeadAnimals = 0;
+        era = 1;
     }
 
     @Override
@@ -63,7 +69,13 @@ public class WorldMap implements IWorldMap{
         return false;
     }
 
+    private void updateDeadAnimalsLongevity(Animal animal){
+        totalLongevityForDeadAnimals += animal.getAge();
+        nrOfDeadAnimals++;
+    }
+
     public void removeAnimal(Animal animal) { //usuwanie martwego zwierzecia
+        updateDeadAnimalsLongevity(animal);
         Vector2D animalPosition = animal.getPosition();
         animals.get(animalPosition).remove(animal);
         mapElements.get(animalPosition).remove(animal);
@@ -95,9 +107,9 @@ public class WorldMap implements IWorldMap{
     }
 
     public void eating(){
-        for(IMapElement plant: environmentElements.values()){ //dla kazdej rosliny sprawdzam, czy jakies zwierze na niej stoi, jesli tak, to zjada ja zwierze z najwieksza energia na tym polu
-            if(animals.containsKey(plant.getPosition())){
-                ArrayList<Animal> animalsAtCurrentPosition = animals.get(plant.getPosition());
+        for(Vector2D plantPosition: environmentElements.keySet()){ //dla kazdej rosliny sprawdzam, czy jakies zwierze na niej stoi, jesli tak, to zjada ja zwierze z najwieksza energia na tym polu
+            if(animals.containsKey(plantPosition)){
+                ArrayList<Animal> animalsAtCurrentPosition = animals.get(plantPosition);
                 if(animalsAtCurrentPosition.size() == 1) //jesli jest tylko jedno zwierze, po prostu zjada rosline
                     animalsAtCurrentPosition.get(0).gainEnergy(plantEnergy);
                 else{
@@ -117,8 +129,8 @@ public class WorldMap implements IWorldMap{
                             animal.gainEnergy(maxEnergy / nrOfAnimalsWithMaxEnergy); //jesli jest kilka zwierzat z najwyzsza energia, dziela energie z rosliny miedzy soba
                     }
                 }
-                environmentElements.remove(plant.getPosition()); //usuwam zjedzona rosline z mapy
-                mapElements.get(plant.getPosition()).remove(plant);
+                mapElements.get(plantPosition).remove(environmentElements.get(plantPosition));
+                environmentElements.remove(plantPosition); //usuwam zjedzona rosline z mapy
             }
         }
     }
@@ -164,7 +176,9 @@ public class WorldMap implements IWorldMap{
                             int secondIdx = random.nextInt(nrOfAnimalsThatCanBreed);
                             while(secondIdx == firstIdx) //jesli dwa razy wylosuje to samo zwierze, losuje jeszcze raz
                                 secondIdx = random.nextInt(nrOfAnimalsThatCanBreed);
-                            capableOfBreeding.get(firstIdx).reproduce(capableOfBreeding.get(secondIdx));
+                            placeMapElement(capableOfBreeding.get(firstIdx).reproduce(capableOfBreeding.get(secondIdx)));
+                            capableOfBreeding.get(firstIdx).addChildToNrOfChildrenTracker();
+                            capableOfBreeding.get(secondIdx).addChildToNrOfChildrenTracker();
                         }
                     }
                 }
@@ -288,5 +302,51 @@ public class WorldMap implements IWorldMap{
 
     public FreeSpaceObserver getAnimalsObserver() {
         return animalsObserver;
+    }
+
+    public int getDominatingGenotype(){
+        byte[] geneCounter = new byte[8];
+        ArrayList<Animal> animalsList = getAnimalsList();
+        for(Animal animal: animalsList){
+            for(byte gene: animal.getGenes()){
+                geneCounter[gene] ++;
+            }
+        }
+        int maxIdx = 0;
+        for(int i=1; i<geneCounter.length; i++){
+            if(geneCounter[i] > geneCounter[maxIdx])
+                maxIdx = i;
+        }
+        return maxIdx;
+    }
+
+    public int getAverageEnergyLevel(){
+        int sumOfEnergy = 0;
+        ArrayList<Animal> animalList = getAnimalsList();
+        for(Animal animal: animalList)
+            sumOfEnergy += animal.getEnergy();
+        return (int) (sumOfEnergy / animalList.size());
+    }
+
+    public int getAverageLongevityForDeadAnimals(){
+        if(nrOfDeadAnimals > 0)
+            return (int) (totalLongevityForDeadAnimals / nrOfDeadAnimals);
+        return 0;
+    }
+
+    public int getAverageNrOfChildrenForAliveAnimals(){
+        int totalNrOfChildren = 0;
+        ArrayList<Animal> animalsList = getAnimalsList();
+        for(Animal animal: animalsList)
+            totalNrOfChildren += animal.getNrOfChildren();
+        return (int) (totalNrOfChildren / animalsList.size());
+    }
+
+    public void updateEra(){
+        era++;
+    }
+
+    public int getEra() {
+        return era;
     }
 }

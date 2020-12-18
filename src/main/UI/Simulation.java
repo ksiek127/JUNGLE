@@ -12,32 +12,45 @@ public class Simulation implements ActionListener {
 
     private final WorldMap map; //mapa swiata
     private final JFrame frame;
+    private final JFrame statsFrame;
     private final DisplayPanel displayPanel;
+    private final StatsPanel statsPanel;
     private final int nrOfAnimalsInTheBeginning; //ilosc zwierzat na poczatku
     private final int delay; //przerwa pomiedzy kolejnymi dniami, zeby mozna bylo sledzic symulacje w normalnym tempie
     private final int startEnergy;
     private int plantEnergy;
     private int moveEnergy;
-    private int era;
     private Timer timer;
+    private Vector2D location;
 
-    public Simulation(WorldMap map, int nrOfAnimalsInTheBeginning, int delay, int startEnergy, int plantEnergy, int moveEnergy){
+    public Simulation(WorldMap map, int nrOfAnimalsInTheBeginning, int delay, int startEnergy, int plantEnergy, int moveEnergy, Vector2D location, Vector2D statsPanelPosition){
         this.map = map;
         this.nrOfAnimalsInTheBeginning = nrOfAnimalsInTheBeginning;
         this.delay = delay;
         this.startEnergy = startEnergy;
         this.plantEnergy = plantEnergy;
         this.moveEnergy = moveEnergy;
-        this.era = 1;
         this.timer = new Timer(delay, this);
+        this.location = location;
         frame = new JFrame("JUNGLE");
-        frame.setSize(map.getWidth(), map.getHeight());
-        frame.setLocationRelativeTo(null);
+        frame.setLayout(null);
+        statsPanel = new StatsPanel(map, statsPanelPosition);
+        statsPanel.setLayout(null);
+        statsPanel.setSize(map.getWidth(), 350);
+        frame.setSize(map.getWidth(), map.getHeight() + statsPanel.getHeight());
+        //frame.setLocationRelativeTo(null);
+        frame.setLocation(location.getX(), location.getY());
         frame.setVisible(true);
         displayPanel = new DisplayPanel(map, this);
         displayPanel.setSize(new Dimension(1,1));
         frame.add(displayPanel);
-        era = 1;
+        //frame.add(statsPanel);
+        statsFrame = new JFrame("STATS");
+        statsFrame.setLayout(null);
+        statsFrame.setSize(map.getWidth(), 350);
+        statsFrame.setLocation(statsPanelPosition.getX(), statsPanelPosition.getY());
+        statsFrame.setVisible(true);
+        statsFrame.add(statsPanel);
     }
 
     public void start(){ //umieszczenie zwierzat na startowych pozycjach i rozpoczecie symulacji
@@ -60,13 +73,18 @@ public class Simulation implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         displayPanel.repaint();
+        statsPanel.repaint();
         ArrayList<Animal> animals = map.getAnimalsList(); //lista wszystkich zwierzat
         if(animals.size() == 0){ //jesli nie ma juz zywych zwierzat, koncze symulacje
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            statsFrame.dispatchEvent(new WindowEvent(statsFrame, WindowEvent.WINDOW_CLOSING));
         }
         for(Animal animal : animals){ //usuwam martwe zwierzeta z mapy
             if(animal.getIsDead())
                 map.removeAnimal(animal);
+        }
+        for(Animal animal: animals){ //dla kazdego zwierzecia sprawdzam, czy ma wystarczajaco duzo energii do rozmnazania
+            animal.setCanBreed(animal.getEnergy() >= World.getEnergyRequiredToBreed());
         }
         animals = map.getAnimalsList(); //aktualna lista zwierzat po usunieciu martwych
         for(Animal animal: animals){
@@ -80,7 +98,7 @@ public class Simulation implements ActionListener {
         map.breeding(animals);
         //dodanie nowych roslin do mapy
         map.spawnPlants();
-        era++; //nowa epoka
+        map.updateEra(); //nowa epoka
     }
 
     public JFrame getFrame() {

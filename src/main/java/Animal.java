@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -9,6 +10,9 @@ public class Animal extends AbstractMapElement implements IMapElement{
     private boolean isDead; //czy zwierze jest martwe
     private final byte[] genes;
     private Boolean canBreed; //czy moze sie rozmnazac, aktualizowane codziennie po jedzeniu
+    private int age;
+    private int nrOfChildren;
+    private int nrOfDescendientes;
 
     public Animal(IWorldMap map, Vector2D initialPosition, byte[] genes, int energy) {
         this.map = map;
@@ -21,6 +25,9 @@ public class Animal extends AbstractMapElement implements IMapElement{
         this.orientation = Direction.intToDirection(genes[orientationIdx]);
         this.energy = energy;
         this.isEnvironmentElement = false;
+        age = 0;
+        nrOfChildren = 0;
+        nrOfDescendientes = 0;
     }
 
     private void changeOrientation(){ //zmiana orientacji na podstawie genow
@@ -56,6 +63,7 @@ public class Animal extends AbstractMapElement implements IMapElement{
     }
 
     public void update(int cost){ //wykonanie akcji zwiazanych z koncem dnia
+        age ++;
         changeOrientation();
         move(cost);
     }
@@ -135,5 +143,34 @@ public class Animal extends AbstractMapElement implements IMapElement{
 
     public void setPosition(Vector2D position) {
         this.position = position;
+    }
+
+    public Color getColor(){ //kolor zwierzecia zalezy od ilosci energii
+        if(energy > 1000)
+            return new Color(0,0,0);
+        if(energy > 700)
+            return new Color(255, 0, 0);
+        if(energy > 500)
+            return new Color(255,69,0);
+        if(energy > 250)
+            return new Color(255,160,122);
+        return new Color(219,112,147);
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void addChildToNrOfChildrenTracker(){
+        nrOfChildren++;
+        nrOfDescendientes++;
+    }
+
+    public void addDescendiente(){
+        nrOfDescendientes++;
+    }
+
+    public int getNrOfChildren() {
+        return nrOfChildren;
     }
 }
