@@ -14,7 +14,7 @@ public class StatsPanel extends JPanel {
     public void paintComponent(Graphics graphics){
         super.paintComponent(graphics);
         this.setLayout(null);
-        this.setSize(map.getWidth(),350);
+        this.setSize(map.getWidth() * 10,350);
         this.setLocation(0,0);
 //        graphics.setColor(new Color( 0, 227, 0)); //OUT
 //        graphics.fillRect(0,0, map.getWidth(), 350); //OUT
@@ -26,7 +26,7 @@ public class StatsPanel extends JPanel {
 //        graphics.drawString("Average animal's energy level: " + map.getAverageEnergyLevel(), position.getX(), position.getY() + 50); //dla zyjacych zwierzat
 //        graphics.drawString("Average longevity: " + map.getAverageLongevityForDeadAnimals(), position.getX(), position.getY() + 50); //dla martwych zwierzat
 //        graphics.drawString("Average number of children: " + map.getAverageNrOfChildrenForAliveAnimals(), position.getX(), position.getY() + 50); //dla zyjacych zwierzat
-        graphics.drawString("Current era: " + map.getEra(), 0, 0);
+        graphics.drawString("Current era: " + map.getEra(), 0, 20);
         graphics.drawString("Animals still alive: " + map.getAnimalsList().size(), 0, 50);
         graphics.drawString("Plants on the map: " + map.getEnvironmentElementsList().size(), 0, 100);
         graphics.drawString("Dominating genotype: " + map.getDominatingGenotype(), 0, 150);

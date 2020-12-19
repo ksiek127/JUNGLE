@@ -7,7 +7,7 @@ class WorldMapTest {
     @org.junit.jupiter.api.Test
     void isFreeSpaceInTheJungleShouldReturnTrueIfThereIsFreeSpaceInTheJungle() {
         WorldMap testMap = new WorldMap(4,4,0.5,2);
-        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};
         Animal experimentalRabbit = new Animal(testMap, new Vector2D(1,2), genes, 30);
         testMap.placeMapElement(experimentalRabbit);
         assertTrue(testMap.isFreeSpaceInTheJungle());
@@ -16,7 +16,7 @@ class WorldMapTest {
     @org.junit.jupiter.api.Test
     void isFreeSpaceInTheJungleShouldReturnFalseIfThereIsNoFreeSpaceInTheJungle() {
         WorldMap testMap = new WorldMap(4,4,0.5,2);
-        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};
         Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
         Animal experimentalRabbit2 = new Animal(testMap, new Vector2D(1,2), genes, 30);
         Animal experimentalRabbit3 = new Animal(testMap, new Vector2D(2,1), genes, 30);
@@ -31,7 +31,7 @@ class WorldMapTest {
     @org.junit.jupiter.api.Test
     void isAnyAdjacentPositionFreeShouldReturnTrueIfThereIsAFreeAdjacentPosition() {
         WorldMap testMap = new WorldMap(4,4,0.5,2);
-        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};
         Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
         Animal experimentalRabbit2 = new Animal(testMap, new Vector2D(1,2), genes, 30);
         Animal experimentalRabbit3 = new Animal(testMap, new Vector2D(2,1), genes, 30);
@@ -71,7 +71,7 @@ class WorldMapTest {
     @org.junit.jupiter.api.Test
     void isAnyAdjacentPositionFreeShouldReturnTrueIfThereIsAFreeAdjacentPositionAndTheArgumentPositionItselfIsOccupied() {
         WorldMap testMap = new WorldMap(4,4,0.5,2);
-        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};
         Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
         Animal experimentalRabbit2 = new Animal(testMap, new Vector2D(1,2), genes, 30);
         Animal experimentalRabbit3 = new Animal(testMap, new Vector2D(2,1), genes, 30);
@@ -102,7 +102,7 @@ class WorldMapTest {
     @Test
     public void placeMapElementShouldPlaceAnAnimalOnTheMap(){
         WorldMap testMap = new WorldMap(4,4,0.5,2);
-        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};
         Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
         testMap.placeMapElement(experimentalRabbit1);
         assertEquals(experimentalRabbit1, testMap.getAnimals().get(experimentalRabbit1.getPosition()).get(0));
@@ -111,7 +111,7 @@ class WorldMapTest {
     @Test
     public void isOccupiedShouldReturnTrueIfThePlaceIsOccupied(){
         WorldMap testMap = new WorldMap(4,4,0.5,2);
-        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};
         Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
         testMap.placeMapElement(experimentalRabbit1);
         assertTrue(testMap.isOccupied(new Vector2D(1,1)));
@@ -120,7 +120,7 @@ class WorldMapTest {
     @Test
     public void isOccupiedByLivingEntityShouldReturnTrueIfThePlaceIsOccupiedByAnAnimal(){
         WorldMap testMap = new WorldMap(4,4,0.5,2);
-        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,8};
+        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};
         Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
         testMap.placeMapElement(experimentalRabbit1);
         assertTrue(testMap.isOccupiedByLivingEntity(new Vector2D(1,1)));

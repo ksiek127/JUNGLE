@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConfigPanel extends JPanel implements ActionListener {
     private final JTextField width; //szerokosc mapy
@@ -12,6 +13,14 @@ public class ConfigPanel extends JPanel implements ActionListener {
     private final JTextField jungleRatio; //proporcje dzungli do sawanny
     private final JTextField nrOfAnimalsInTheBeginning; //ilosc zwierzat na poczatku
     private final JTextField delay; //przerwa miedzy kolejnymi dniami
+
+    private final Vector2D mapPosition;
+    private final Vector2D secondMapPosition;
+    private final Vector2D statsPanelPosition;
+    private final Vector2D secondStatsPanelPosition;
+    private final int scale;
+    private final WorldMap map;
+    private final WorldMap secondMap;
 
     private final JLabel widthLabel;
     private final JLabel heightLabel;
@@ -24,9 +33,12 @@ public class ConfigPanel extends JPanel implements ActionListener {
 
     private final JButton start;
     private final JButton pauseLeftSimulation;
-    private final JButton resumeLeftSimulation;
+//    private final JButton resumeLeftSimulation;
     private final JButton pauseRightSimulation;
-    private final JButton resumeRightSimulation;
+//    private final JButton resumeRightSimulation;
+//    private AtomicBoolean leftPaused;
+//    private Thread leftThreadObject;
+//    private Thread rightThreadObject;
 
     public ConfigPanel(LoadJson parameters){
         widthLabel = new JLabel("Width: "); //inicjalizacja podpisow
@@ -63,17 +75,71 @@ public class ConfigPanel extends JPanel implements ActionListener {
         delayLabel.setLabelFor(delay);
         start = new JButton("Start the simulations");
         pauseLeftSimulation = new JButton("Pause left simulation");
-        resumeLeftSimulation = new JButton("Resume left simulation");
+//        resumeLeftSimulation = new JButton("Resume left simulation");
         pauseRightSimulation = new JButton("Pause right simulation");
-        resumeRightSimulation = new JButton("Resume right simulation");
+//        resumeRightSimulation = new JButton("Resume right simulation");
         start.addActionListener(this);
+
+        mapPosition = new Vector2D(150, 200);
+        map = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
+        secondMapPosition = new Vector2D(800, 200);
+        secondMap = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
+        scale = map.getWidth() / 10;
+        statsPanelPosition = new Vector2D(mapPosition.getX(), mapPosition.getY() + Integer.parseInt(height.getText()) * scale);
+        secondStatsPanelPosition = new Vector2D(secondMapPosition.getX(), secondMapPosition.getY() + Integer.parseInt(height.getText()) * scale);
+//        Vector2D secondStatsPanelPosition = new Vector2D(800, 500);
+
+//        leftPaused = map.getPaused();
+//        Runnable leftRunnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                while (true){
+//                    if(leftPaused.get()){
+//                        synchronized (leftThreadObject){
+//                            try{
+//                                leftThreadObject.wait();
+//                            }catch (InterruptedException e){
+//
+//                            }
+//                        }
+//                    }
+//                    try{
+//                        Thread.sleep(1000);
+//                    }catch (InterruptedException e){
+//
+//                    }
+//                }
+//            }
+//        };
+//        leftThreadObject = new Thread(leftRunnable);
+//        leftThreadObject.start();
 
         pauseLeftSimulation.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                if(!map.getPaused().get()){
+                    pauseLeftSimulation.setText("Resume left simulation");
+                    map.setPaused(true);
+                }else{
+                    pauseLeftSimulation.setText("Pause left simulation");
+                    map.setPaused(false);
+                }
             }
         });
+
+        pauseRightSimulation.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!secondMap.getPaused().get()){
+                    pauseRightSimulation.setText("Resume right simulation");
+                    secondMap.setPaused(true);
+                }else{
+                    pauseRightSimulation.setText("Pause right simulation");
+                    secondMap.setPaused(false);
+                }
+            }
+        });
+
 
         setPreferredSize(new Dimension(getWidth(), getHeight()));
         //setPreferredSize(new Dimension(1000, 1000));
@@ -130,16 +196,16 @@ public class ConfigPanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Vector2D mapPosition = new Vector2D(150, 200);
-        //Vector2D statsPanelPosition = new Vector2D(mapPosition.getX(), mapPosition.getY() + Integer.parseInt(height.getText()));
-        Vector2D statsPanelPosition = new Vector2D(150, 500);
-        Vector2D secondMapPosition = new Vector2D(800, 200);
-        //Vector2D secondStatsPanelPosition = new Vector2D(secondMapPosition.getX(), secondMapPosition.getY() + Integer.parseInt(height.getText()));
-        Vector2D secondStatsPanelPosition = new Vector2D(800, 500);
-        WorldMap map = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
-        Simulation simulation = new Simulation(map, Integer.parseInt(nrOfAnimalsInTheBeginning.getText()), Integer.parseInt(delay.getText()), Integer.parseInt(startEnergy.getText()), Integer.parseInt(plantEnergy.getText()), Integer.parseInt(moveEnergy.getText()), mapPosition, statsPanelPosition);
-        WorldMap secondMap = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
-        Simulation secondSimulation = new Simulation(secondMap, Integer.parseInt(nrOfAnimalsInTheBeginning.getText()), Integer.parseInt(delay.getText()), Integer.parseInt(startEnergy.getText()), Integer.parseInt(plantEnergy.getText()), Integer.parseInt(moveEnergy.getText()), secondMapPosition, secondStatsPanelPosition);
+//        Vector2D mapPosition = new Vector2D(150, 200);
+//        WorldMap map = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
+//        Vector2D secondMapPosition = new Vector2D(800, 200);
+//        WorldMap secondMap = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
+//        int scale = map.getWidth() / 10;
+//        Vector2D statsPanelPosition = new Vector2D(mapPosition.getX(), mapPosition.getY() + Integer.parseInt(height.getText()) * scale);
+//        Vector2D secondStatsPanelPosition = new Vector2D(secondMapPosition.getX(), secondMapPosition.getY() + Integer.parseInt(height.getText()) * scale);
+////        Vector2D secondStatsPanelPosition = new Vector2D(800, 500);
+        Simulation simulation = new Simulation(map, Integer.parseInt(nrOfAnimalsInTheBeginning.getText()), Integer.parseInt(delay.getText()), Integer.parseInt(startEnergy.getText()), Integer.parseInt(plantEnergy.getText()), Integer.parseInt(moveEnergy.getText()), mapPosition, statsPanelPosition, scale);
+        Simulation secondSimulation = new Simulation(secondMap, Integer.parseInt(nrOfAnimalsInTheBeginning.getText()), Integer.parseInt(delay.getText()), Integer.parseInt(startEnergy.getText()), Integer.parseInt(plantEnergy.getText()), Integer.parseInt(moveEnergy.getText()), secondMapPosition, secondStatsPanelPosition, scale);
         simulation.start();
         secondSimulation.start();
     }

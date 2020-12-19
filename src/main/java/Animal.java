@@ -146,7 +146,7 @@ public class Animal extends AbstractMapElement implements IMapElement{
     }
 
     public Color getColor(){ //kolor zwierzecia zalezy od ilosci energii
-        if(energy > 1000)
+        if(energy > 900)
             return new Color(0,0,0);
         if(energy > 700)
             return new Color(255, 0, 0);

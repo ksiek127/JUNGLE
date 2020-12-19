@@ -4,5 +4,4 @@ public class Plant extends AbstractMapElement implements IMapElement{
         this.position = position;
         this.isEnvironmentElement = true;
     }
-
 }

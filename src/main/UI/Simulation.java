@@ -22,8 +22,9 @@ public class Simulation implements ActionListener {
     private int moveEnergy;
     private Timer timer;
     private Vector2D location;
+    private final int scale;
 
-    public Simulation(WorldMap map, int nrOfAnimalsInTheBeginning, int delay, int startEnergy, int plantEnergy, int moveEnergy, Vector2D location, Vector2D statsPanelPosition){
+    public Simulation(WorldMap map, int nrOfAnimalsInTheBeginning, int delay, int startEnergy, int plantEnergy, int moveEnergy, Vector2D location, Vector2D statsPanelPosition, int scale){
         this.map = map;
         this.nrOfAnimalsInTheBeginning = nrOfAnimalsInTheBeginning;
         this.delay = delay;
@@ -32,22 +33,23 @@ public class Simulation implements ActionListener {
         this.moveEnergy = moveEnergy;
         this.timer = new Timer(delay, this);
         this.location = location;
+        this.scale = scale;
         frame = new JFrame("JUNGLE");
         frame.setLayout(null);
         statsPanel = new StatsPanel(map, statsPanelPosition);
         statsPanel.setLayout(null);
-        statsPanel.setSize(map.getWidth(), 350);
-        frame.setSize(map.getWidth(), map.getHeight() + statsPanel.getHeight());
+        statsPanel.setSize(map.getWidth() * scale, 350);
+        frame.setSize(map.getWidth() * scale, map.getHeight() * scale);
         //frame.setLocationRelativeTo(null);
         frame.setLocation(location.getX(), location.getY());
         frame.setVisible(true);
-        displayPanel = new DisplayPanel(map, this);
+        displayPanel = new DisplayPanel(map, this, scale);
         displayPanel.setSize(new Dimension(1,1));
         frame.add(displayPanel);
         //frame.add(statsPanel);
         statsFrame = new JFrame("STATS");
         statsFrame.setLayout(null);
-        statsFrame.setSize(map.getWidth(), 350);
+        statsFrame.setSize(map.getWidth() * scale, 350);
         statsFrame.setLocation(statsPanelPosition.getX(), statsPanelPosition.getY());
         statsFrame.setVisible(true);
         statsFrame.add(statsPanel);
@@ -72,33 +74,32 @@ public class Simulation implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        displayPanel.repaint();
-        statsPanel.repaint();
-        ArrayList<Animal> animals = map.getAnimalsList(); //lista wszystkich zwierzat
-        if(animals.size() == 0){ //jesli nie ma juz zywych zwierzat, koncze symulacje
-            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-            statsFrame.dispatchEvent(new WindowEvent(statsFrame, WindowEvent.WINDOW_CLOSING));
+        if(!map.getPaused().get()){
+            displayPanel.repaint();
+            statsPanel.repaint();
+            ArrayList<Animal> animals = map.getAnimalsList(); //lista wszystkich zwierzat
+            if(animals.size() == 0){ //jesli nie ma juz zywych zwierzat, koncze symulacje
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                statsFrame.dispatchEvent(new WindowEvent(statsFrame, WindowEvent.WINDOW_CLOSING));
+            }
+            for(Animal animal : animals){ //usuwam martwe zwierzeta z mapy
+                if(animal.getIsDead())
+                    map.removeAnimal(animal);
+            }
+            animals = map.getAnimalsList(); //aktualna lista zwierzat po usunieciu martwych
+            for(Animal animal: animals){
+                animal.update(moveEnergy); //skret i przemieszczenie
+            }
+            //jedzenie
+            map.eating();
+            for(Animal animal: animals)
+                animal.checkIfCanCanBreed(); //po jedzeniu aktualizuje informacje o zdolnosci zwierzat do rozmnazania
+            //rozmnazanie
+            map.breeding(animals);
+            //dodanie nowych roslin do mapy
+            map.spawnPlants();
+            map.updateEra(); //nowa epoka
         }
-        for(Animal animal : animals){ //usuwam martwe zwierzeta z mapy
-            if(animal.getIsDead())
-                map.removeAnimal(animal);
-        }
-        for(Animal animal: animals){ //dla kazdego zwierzecia sprawdzam, czy ma wystarczajaco duzo energii do rozmnazania
-            animal.setCanBreed(animal.getEnergy() >= World.getEnergyRequiredToBreed());
-        }
-        animals = map.getAnimalsList(); //aktualna lista zwierzat po usunieciu martwych
-        for(Animal animal: animals){
-            animal.update(moveEnergy); //skret i przemieszczenie
-        }
-        //jedzenie
-        map.eating();
-        for(Animal animal: animals)
-            animal.checkIfCanCanBreed(); //po jedzeniu aktualizuje informacje o zdolnosci zwierzat do rozmnazania
-        //rozmnazanie
-        map.breeding(animals);
-        //dodanie nowych roslin do mapy
-        map.spawnPlants();
-        map.updateEra(); //nowa epoka
     }
 
     public JFrame getFrame() {
