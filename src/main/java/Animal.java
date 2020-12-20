@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class Animal extends AbstractMapElement implements IMapElement{
     private Direction orientation; //orientacja na mapie
-    private final IWorldMap map; //mapa, na ktorej znajduje sie dane zwierze
+    private final WorldMap map; //mapa, na ktorej znajduje sie dane zwierze
     private int energy; //ilosc energii
     private boolean isDead; //czy zwierze jest martwe
     private final byte[] genes;
@@ -13,8 +13,10 @@ public class Animal extends AbstractMapElement implements IMapElement{
     private int age;
     private int nrOfChildren;
     private int nrOfDescendientes;
+    private Animal mom;
+    private Animal dad;
 
-    public Animal(IWorldMap map, Vector2D initialPosition, byte[] genes, int energy) {
+    public Animal(WorldMap map, Vector2D initialPosition, byte[] genes, int energy) {
         this.map = map;
         this.position = initialPosition;
         this.isEnvironmentElement = false;
@@ -28,6 +30,7 @@ public class Animal extends AbstractMapElement implements IMapElement{
         age = 0;
         nrOfChildren = 0;
         nrOfDescendientes = 0;
+        canBreed = energy >= World.getEnergyRequiredToBreed() / 2;
     }
 
     private void changeOrientation(){ //zmiana orientacji na podstawie genow
@@ -37,9 +40,21 @@ public class Animal extends AbstractMapElement implements IMapElement{
         orientation = Direction.intToDirection((orientation.directionToInt() + changeOrientation) % 8);
     }
 
+    public void translateLocationIfOutOfMap(){
+        if(position.getX() < 0)
+            position.setX(map.getWidth() - 1);
+        if(position.getX() >= map.getWidth())
+            position.setX(0);
+        if(position.getY() < 0)
+            position.setY(map.getHeight() - 1);
+        if(position.getY() >= map.getHeight())
+            position.setY(0);
+    }
+
     private void move(int cost){ //wykonanie pojedynczego ruchu
         Vector2D prevPosition = position;
         this.position = this.position.add(this.orientation.toUnitVector());
+        translateLocationIfOutOfMap();
         loseEnergy(cost); //utrata energii zuzytej na poruszanie
         map.moveAnimal(this, prevPosition);
     }
@@ -66,6 +81,11 @@ public class Animal extends AbstractMapElement implements IMapElement{
         age ++;
         changeOrientation();
         move(cost);
+    }
+
+    public void setParents(Animal mom, Animal dad){
+        this.mom = mom;
+        this.dad = dad;
     }
 
     public static void fixGenes(byte[] genes){ //przy losowaniu genow zwierzecia, moze ktoregos zabraknac i to jest funkcja, ktora zapewnia, ze nowo powstale zwierze ma co najmniej jeden gen kazdego kierunku
@@ -103,10 +123,15 @@ public class Animal extends AbstractMapElement implements IMapElement{
         int babyX = random.nextInt(3) + position.getX() - 1;
         int babyY = random.nextInt(3) + position.getY() - 1;
         Vector2D babyPosition = new Vector2D(babyX, babyY);
+        int babyEnergy = this.energy / 4 + other.energy / 4; //dziecko dostaje energie od rodzicow
+        this.loseEnergy(this.energy / 4); //rodzice traca energie na rzecz dziecka
+        other.loseEnergy(other.energy / 4);
+        Animal baby = new Animal(map, babyPosition, babyGenes, babyEnergy);
         if(map.isAnyAdjacentPositionFree(position)){
             while (map.isOccupiedByLivingEntity(babyPosition)){ //losowanie dopoki wylosuje sie wolne pole
                 babyPosition.setX(random.nextInt(3) + position.getX() - 1);
                 babyPosition.setY(random.nextInt(3) + position.getY() - 1);
+                baby.translateLocationIfOutOfMap();
             }
         }else{
             while (babyPosition.getX() == position.getX() && babyPosition.getY() == position.getY()){ //dziecko nie moze sie pojawic na tym samym polu, na ktorym stoja jego rodzice
@@ -114,14 +139,14 @@ public class Animal extends AbstractMapElement implements IMapElement{
                 babyPosition.setY(random.nextInt(3) + position.getY() - 1);
             }
         }
-        int babyEnergy = this.energy / 4 + other.energy / 4; //dziecko dostaje energie od rodzicow
-        this.loseEnergy(this.energy / 4); //rodzice traca energie na rzecz dziecka
-        other.loseEnergy(other.energy / 4);
-        Animal baby = new Animal(map, babyPosition, babyGenes, babyEnergy);
+        baby.setPosition(babyPosition);
         //musi byc co najmniej jeden gen kazdego kierunku
         baby.sortGenes();
         fixGenes(babyGenes);
         baby.sortGenes(); //sortuje jeszcze raz, teraz juz jest co najmniej jeden gen kazdego typu
+        this.addChildToNrOfChildrenTracker();
+        other.addChildToNrOfChildrenTracker();
+        baby.setParents(this, other);
         return baby;
     }
 
@@ -161,13 +186,17 @@ public class Animal extends AbstractMapElement implements IMapElement{
         return age;
     }
 
-    public void addChildToNrOfChildrenTracker(){
-        nrOfChildren++;
+    public void addDescendant(){
         nrOfDescendientes++;
+        if(mom != null)
+            mom.addDescendant();
+        if(dad != null)
+            dad.addDescendant();
     }
 
-    public void addDescendiente(){
-        nrOfDescendientes++;
+    public void addChildToNrOfChildrenTracker(){
+        nrOfChildren++;
+        addDescendant();
     }
 
     public int getNrOfChildren() {

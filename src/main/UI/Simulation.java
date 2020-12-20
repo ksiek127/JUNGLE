@@ -95,7 +95,7 @@ public class Simulation implements ActionListener {
             for(Animal animal: animals)
                 animal.checkIfCanCanBreed(); //po jedzeniu aktualizuje informacje o zdolnosci zwierzat do rozmnazania
             //rozmnazanie
-            map.breeding(animals);
+            map.breeding();
             //dodanie nowych roslin do mapy
             map.spawnPlants();
             map.updateEra(); //nowa epoka

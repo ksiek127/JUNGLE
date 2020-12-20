@@ -3,6 +3,7 @@ import java.util.LinkedHashMap;
 import java.util.Optional;
 
 public interface IWorldMap {
+
     void placeMapElement(IMapElement element); //umieszczam obiekt na mapie
 
     boolean isOccupied(Vector2D position); //czy na danym polu cos sie znajduje

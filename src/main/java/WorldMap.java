@@ -3,7 +3,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WorldMap implements IWorldMap{
     private final int width; //szerokosc mapy
-    private final int height; //wysokosc mapy
+    private final int height; //wysokosc mapyprivate final int width; //szerokosc mapy
     private final double jungleRatio; //proporcje dzungli do sawanny
     private final int plantEnergy; //ilosc energii dodawana po zjedzeniu rosliny
     private final Vector2D jgBottomLeft; //lewy dolny rog dzungli
@@ -119,6 +119,29 @@ public class WorldMap implements IWorldMap{
         return animalsAtGivenPosition;
     }
 
+    @Override
+    public void placeMapElement(IMapElement element){ //dodaje do elementow na mapie
+        if(element.getIsEnvironmentElement()){ //jesli to jest element otoczenia (trawa)
+            if (grassObserver.isTheSpaceFree(element.getPosition())) {
+                mapElements.put(element.getPosition(), new ArrayList<IMapElement>());
+                mapElements.get(element.getPosition()).add(element);
+                grassObserver.removeSpace(element.getPosition());
+                //dodaje do elementow otoczenia
+                environmentElements.put(element.getPosition(), element);
+            }
+        }if(!element.getIsEnvironmentElement()){ //jesli to jest zwierze
+            mapElements.put(element.getPosition(), new ArrayList<IMapElement>());
+            mapElements.get(element.getPosition()).add(element);
+            grassObserver.removeSpace(element.getPosition());
+            animalsObserver.removeSpace(element.getPosition());
+            //dodaje do zwierzakow na mapie
+            if(!animals.containsKey(element.getPosition())){ //jesli tam nie ma innych zwierzat
+                animals.put(element.getPosition(), new ArrayList<Animal>());
+            }
+            animals.get(element.getPosition()).add((Animal) element);
+        }
+    }
+
     private void removeMapElement(IMapElement element){
         Vector2D elementPosition = element.getPosition();
         for(Vector2D position: mapElements.keySet()){
@@ -140,28 +163,56 @@ public class WorldMap implements IWorldMap{
         removeMapElement(plant);
     }
 
+//    public void eating(){
+//        ArrayList<IMapElement> environmentElementsList = getEnvironmentElementsList();
+//        for(IMapElement plant: environmentElementsList){ //dla kazdej rosliny sprawdzam, czy jakies zwierze na niej stoi, jesli tak, to zjada ja zwierze z najwieksza energia na tym polu
+//            Vector2D plantPosition = plant.getPosition();
+//            if(isOccupiedByLivingEntity(plantPosition)){
+//                ArrayList<Animal> animalsAtCurrentPosition = animalsAt(plantPosition);
+//                if(animalsAtCurrentPosition.size() == 1) //jesli jest tylko jedno zwierze, po prostu zjada rosline
+//                    animalsAtCurrentPosition.get(0).gainEnergy(plantEnergy);
+//                else{
+//                    int maxEnergy = animalsAtCurrentPosition.get(0).getEnergy();
+//                    int nrOfAnimalsWithMaxEnergy = 1;
+//                    for(int i=1; i<animalsAtCurrentPosition.size(); i++){
+//                        if(animalsAtCurrentPosition.get(i).getEnergy() == maxEnergy){
+//                            nrOfAnimalsWithMaxEnergy++;
+//                        }
+//                        else if(animalsAtCurrentPosition.get(i).getEnergy() > maxEnergy){
+//                            maxEnergy = animalsAtCurrentPosition.get(i).getEnergy();
+//                            nrOfAnimalsWithMaxEnergy = 1;
+//                        }
+//                    }
+//                    for(Animal animal: animalsAtCurrentPosition){
+//                        if(animal.getEnergy() == maxEnergy)
+//                            animal.gainEnergy(maxEnergy / nrOfAnimalsWithMaxEnergy); //jesli jest kilka zwierzat z najwyzsza energia, dziela energie z rosliny miedzy soba
+//                    }
+//                }
+//                removePlant(plant); //usuwam zjedzona rosline z mapy
+//            }
+//        }
+//    }
     public void eating(){
         ArrayList<IMapElement> environmentElementsList = getEnvironmentElementsList();
         for(IMapElement plant: environmentElementsList){ //dla kazdej rosliny sprawdzam, czy jakies zwierze na niej stoi, jesli tak, to zjada ja zwierze z najwieksza energia na tym polu
             Vector2D plantPosition = plant.getPosition();
-            if(isOccupiedByLivingEntity(plantPosition)){
-                ArrayList<Animal> animalsAtCurrentPosition = animalsAt(plantPosition);
-                if(animalsAtCurrentPosition.size() == 1) //jesli jest tylko jedno zwierze, po prostu zjada rosline
+            ArrayList<Animal> animalsAtCurrentPosition = animalsAt(plantPosition);
+            if(animalsAtCurrentPosition.size() > 0) {
+                if (animalsAtCurrentPosition.size() == 1) //jesli jest tylko jedno zwierze, po prostu zjada rosline
                     animalsAtCurrentPosition.get(0).gainEnergy(plantEnergy);
-                else{
+                else {
                     int maxEnergy = animalsAtCurrentPosition.get(0).getEnergy();
                     int nrOfAnimalsWithMaxEnergy = 1;
-                    for(int i=1; i<animalsAtCurrentPosition.size(); i++){
-                        if(animalsAtCurrentPosition.get(i).getEnergy() == maxEnergy){
+                    for (int i = 1; i < animalsAtCurrentPosition.size(); i++) {
+                        if (animalsAtCurrentPosition.get(i).getEnergy() == maxEnergy) {
                             nrOfAnimalsWithMaxEnergy++;
-                        }
-                        else if(animalsAtCurrentPosition.get(i).getEnergy() > maxEnergy){
+                        } else if (animalsAtCurrentPosition.get(i).getEnergy() > maxEnergy) {
                             maxEnergy = animalsAtCurrentPosition.get(i).getEnergy();
                             nrOfAnimalsWithMaxEnergy = 1;
                         }
                     }
-                    for(Animal animal: animalsAtCurrentPosition){
-                        if(animal.getEnergy() == maxEnergy)
+                    for (Animal animal : animalsAtCurrentPosition) {
+                        if (animal.getEnergy() == maxEnergy)
                             animal.gainEnergy(maxEnergy / nrOfAnimalsWithMaxEnergy); //jesli jest kilka zwierzat z najwyzsza energia, dziela energie z rosliny miedzy soba
                     }
                 }
@@ -170,9 +221,10 @@ public class WorldMap implements IWorldMap{
         }
     }
 
-    public void breeding(ArrayList<Animal> animalsArrayList){
+    public void breeding(){
+        ArrayList<Animal> animalsArrayList = getAnimalsList();
         for(Animal animal: animalsArrayList){ //dla kazdego zwierzaka
-            ArrayList<Animal> animalsAtThisPosition = animals.get(animal.getPosition()); //lista zwierzakow na tej pozycji
+            ArrayList<Animal> animalsAtThisPosition = animalsAt(animal.getPosition()); //lista zwierzakow na tej pozycji
             if(animalsAtThisPosition.size() > 1){ //musi byc wiecej niz jedno zwierze, zeby sie rozmnazac
                 ArrayList<Animal> capableOfBreeding = new ArrayList<>();
                 for(Animal animal1: animalsAtThisPosition){ //sprawdzam, czy co najmniej dwa zwierzeta moga sie rozmnazac na tym polu
@@ -205,15 +257,13 @@ public class WorldMap implements IWorldMap{
                         Random random = new Random();
                         if(capableOfBreeding.get(0).getEnergy() > capableOfBreeding.get(1).getEnergy()){ //jesli pierwsze miejsce ma wiecej energii, niz drugie
                             int secondIdx = random.nextInt(nrOfAnimalsThatCanBreed - 1) + 1;
-                            capableOfBreeding.get(0).reproduce(capableOfBreeding.get(secondIdx));
+                            placeMapElement(capableOfBreeding.get(0).reproduce(capableOfBreeding.get(secondIdx)));
                         }else{ //jesli pierwsze i drugie miejsce maja tyle samo energii, losuje dwa zwierzeta sposrod tych, ktore maja najwiecej energii
                             int firstIdx = random.nextInt(nrOfAnimalsThatCanBreed);
                             int secondIdx = random.nextInt(nrOfAnimalsThatCanBreed);
                             while(secondIdx == firstIdx) //jesli dwa razy wylosuje to samo zwierze, losuje jeszcze raz
                                 secondIdx = random.nextInt(nrOfAnimalsThatCanBreed);
                             placeMapElement(capableOfBreeding.get(firstIdx).reproduce(capableOfBreeding.get(secondIdx)));
-                            capableOfBreeding.get(firstIdx).addChildToNrOfChildrenTracker();
-                            capableOfBreeding.get(secondIdx).addChildToNrOfChildrenTracker();
                         }
                     }
                 }
@@ -275,32 +325,6 @@ public class WorldMap implements IWorldMap{
     public ArrayList<IMapElement> getEnvironmentElementsList() { //zwraca kopie roslin
         //return (ArrayList<IMapElement>) environmentElements.values();
         return new ArrayList<IMapElement>(environmentElements.values());
-    }
-    
-    @Override
-    public void placeMapElement(IMapElement element){ //dodaje do elementow na mapie
-        if(element.getIsEnvironmentElement()){ //jesli to jest element otoczenia (trawa)
-            if (grassObserver.isTheSpaceFree(element.getPosition())) {
-                mapElements.put(element.getPosition(), new ArrayList<IMapElement>());
-                mapElements.get(element.getPosition()).add(element);
-                grassObserver.removeSpace(element.getPosition());
-                //dodaje do elementow otoczenia
-                environmentElements.put(element.getPosition(), element);
-            }
-        }if(!element.getIsEnvironmentElement()){ //jesli to jest zwierze
-            if (!animalsObserver.isTheSpaceFree(element.getPosition())) {
-                return;
-            }
-            mapElements.put(element.getPosition(), new ArrayList<IMapElement>());
-            mapElements.get(element.getPosition()).add(element);
-            grassObserver.removeSpace(element.getPosition());
-            animalsObserver.removeSpace(element.getPosition());
-            //dodaje do zwierzakow na mapie
-            if(!animals.containsKey(element.getPosition())){ //jesli tam nie ma innych zwierzat
-                animals.put(element.getPosition(), new ArrayList<Animal>());
-            }
-            animals.get(element.getPosition()).add((Animal) element);
-        }
     }
 
     @Override
