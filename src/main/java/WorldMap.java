@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class WorldMap implements IWorldMap{
     private final int width; //szerokosc mapy
     private final int height; //wysokosc mapyprivate final int width; //szerokosc mapy
-    private final double jungleRatio; //proporcje dzungli do sawanny
     private final int plantEnergy; //ilosc energii dodawana po zjedzeniu rosliny
     private final Vector2D jgBottomLeft; //lewy dolny rog dzungli
     private final Vector2D jgTopRight; //prawy gorny rog dzungli
@@ -16,12 +15,13 @@ public class WorldMap implements IWorldMap{
     private int totalLongevityForDeadAnimals;
     private int nrOfDeadAnimals;
     private int era;
-    private AtomicBoolean paused;
+    private final AtomicBoolean paused;
+    private final AtomicBoolean highlightDominatingGenotype;
 
     public WorldMap(int width, int height, double jungleRatio, int plantEnergy) {
         this.width = width;
         this.height = height;
-        this.jungleRatio = jungleRatio;
+        //proporcje dzungli do sawanny
         this.plantEnergy = plantEnergy;
         this.jgBottomLeft = new Vector2D((int) (width * (1 - jungleRatio) / 2), (int) (height * (1 - jungleRatio) / 2));
         this.jgTopRight = new Vector2D((int) (width * (1 - jungleRatio) / 2) + (int) (jungleRatio * width), (int) (height * (1 - jungleRatio) / 2) + (int) (jungleRatio * height));
@@ -32,6 +32,8 @@ public class WorldMap implements IWorldMap{
         era = 1;
         paused = new AtomicBoolean();
         paused.set(false);
+        highlightDominatingGenotype = new AtomicBoolean();
+        highlightDominatingGenotype.set(false);
     }
 
     @Override
@@ -39,6 +41,17 @@ public class WorldMap implements IWorldMap{
         if(isOccupied(position))
             return Optional.ofNullable(mapElements.get(position));
         return Optional.empty();
+    }
+
+    @Override
+    public boolean isAnyAdjacentPositionFree(Vector2D position){
+        for(int i=position.getX() - 1; i <= position.getX() + 2; i++){
+            for(int j=position.getY() - 1; j <= position.getY() + 2; j++){
+                if(animalsObserver.isTheSpaceFree(new Vector2D(i, j)))
+                    return true;
+            }
+        }
+        return false;
     }
 
     private boolean isFreeSpaceInTheArea(Vector2D bottomLeft, Vector2D topRight){ //pomocnicza funkcja sprawdzajaca, czy jest wolne miejsce w prostokacie
@@ -60,17 +73,6 @@ public class WorldMap implements IWorldMap{
 
     public boolean isFreeSpaceOnTheMap(){
         return grassObserver.isFreeSpace();
-    }
-
-    @Override
-    public boolean isAnyAdjacentPositionFree(Vector2D position){
-        for(int i=position.getX() - 1; i <= position.getX() + 2; i++){
-            for(int j=position.getY() - 1; j <= position.getY() + 2; j++){
-                if(animalsObserver.isTheSpaceFree(new Vector2D(i, j)))
-                    return true;
-            }
-        }
-        return false;
     }
 
     private void updateDeadAnimalsLongevity(Animal animal){
@@ -163,35 +165,6 @@ public class WorldMap implements IWorldMap{
         removeMapElement(plant);
     }
 
-//    public void eating(){
-//        ArrayList<IMapElement> environmentElementsList = getEnvironmentElementsList();
-//        for(IMapElement plant: environmentElementsList){ //dla kazdej rosliny sprawdzam, czy jakies zwierze na niej stoi, jesli tak, to zjada ja zwierze z najwieksza energia na tym polu
-//            Vector2D plantPosition = plant.getPosition();
-//            if(isOccupiedByLivingEntity(plantPosition)){
-//                ArrayList<Animal> animalsAtCurrentPosition = animalsAt(plantPosition);
-//                if(animalsAtCurrentPosition.size() == 1) //jesli jest tylko jedno zwierze, po prostu zjada rosline
-//                    animalsAtCurrentPosition.get(0).gainEnergy(plantEnergy);
-//                else{
-//                    int maxEnergy = animalsAtCurrentPosition.get(0).getEnergy();
-//                    int nrOfAnimalsWithMaxEnergy = 1;
-//                    for(int i=1; i<animalsAtCurrentPosition.size(); i++){
-//                        if(animalsAtCurrentPosition.get(i).getEnergy() == maxEnergy){
-//                            nrOfAnimalsWithMaxEnergy++;
-//                        }
-//                        else if(animalsAtCurrentPosition.get(i).getEnergy() > maxEnergy){
-//                            maxEnergy = animalsAtCurrentPosition.get(i).getEnergy();
-//                            nrOfAnimalsWithMaxEnergy = 1;
-//                        }
-//                    }
-//                    for(Animal animal: animalsAtCurrentPosition){
-//                        if(animal.getEnergy() == maxEnergy)
-//                            animal.gainEnergy(maxEnergy / nrOfAnimalsWithMaxEnergy); //jesli jest kilka zwierzat z najwyzsza energia, dziela energie z rosliny miedzy soba
-//                    }
-//                }
-//                removePlant(plant); //usuwam zjedzona rosline z mapy
-//            }
-//        }
-//    }
     public void eating(){
         ArrayList<IMapElement> environmentElementsList = getEnvironmentElementsList();
         for(IMapElement plant: environmentElementsList){ //dla kazdej rosliny sprawdzam, czy jakies zwierze na niej stoi, jesli tak, to zjada ja zwierze z najwieksza energia na tym polu
@@ -427,5 +400,13 @@ public class WorldMap implements IWorldMap{
 
     public AtomicBoolean getPaused(){
         return paused;
+    }
+
+    public void setHighlightDominatingGenotype(boolean value){
+        highlightDominatingGenotype.set(value);
+    }
+
+    public AtomicBoolean getHighlightDominatingGenotype() {
+        return highlightDominatingGenotype;
     }
 }

@@ -16,37 +16,28 @@ public class Simulation implements ActionListener {
     private final DisplayPanel displayPanel;
     private final StatsPanel statsPanel;
     private final int nrOfAnimalsInTheBeginning; //ilosc zwierzat na poczatku
-    private final int delay; //przerwa pomiedzy kolejnymi dniami, zeby mozna bylo sledzic symulacje w normalnym tempie
     private final int startEnergy;
-    private int plantEnergy;
-    private int moveEnergy;
-    private Timer timer;
-    private Vector2D location;
-    private final int scale;
+    private final int moveEnergy;
+    private final Timer timer;
 
     public Simulation(WorldMap map, int nrOfAnimalsInTheBeginning, int delay, int startEnergy, int plantEnergy, int moveEnergy, Vector2D location, Vector2D statsPanelPosition, int scale){
         this.map = map;
         this.nrOfAnimalsInTheBeginning = nrOfAnimalsInTheBeginning;
-        this.delay = delay;
+        //przerwa pomiedzy kolejnymi dniami, zeby mozna bylo sledzic symulacje w normalnym tempie
         this.startEnergy = startEnergy;
-        this.plantEnergy = plantEnergy;
         this.moveEnergy = moveEnergy;
         this.timer = new Timer(delay, this);
-        this.location = location;
-        this.scale = scale;
         frame = new JFrame("JUNGLE");
         frame.setLayout(null);
         statsPanel = new StatsPanel(map, statsPanelPosition);
         statsPanel.setLayout(null);
         statsPanel.setSize(map.getWidth() * scale, 350);
         frame.setSize(map.getWidth() * scale, map.getHeight() * scale);
-        //frame.setLocationRelativeTo(null);
         frame.setLocation(location.getX(), location.getY());
         frame.setVisible(true);
         displayPanel = new DisplayPanel(map, this, scale);
         displayPanel.setSize(new Dimension(1,1));
         frame.add(displayPanel);
-        //frame.add(statsPanel);
         statsFrame = new JFrame("STATS");
         statsFrame.setLayout(null);
         statsFrame.setSize(map.getWidth() * scale, 350);
@@ -74,8 +65,8 @@ public class Simulation implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        displayPanel.repaint();
         if(!map.getPaused().get()){
-            displayPanel.repaint();
             statsPanel.repaint();
             ArrayList<Animal> animals = map.getAnimalsList(); //lista wszystkich zwierzat
             if(animals.size() == 0){ //jesli nie ma juz zywych zwierzat, koncze symulacje

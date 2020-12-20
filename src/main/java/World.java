@@ -18,7 +18,7 @@ public class World {
     public static void main(String[] args) {
         try{
             LoadJson parameters = LoadJson.loadParameters();
-            energyRequiredToBreed = (int) (parameters.getStartEnergy() / 2);
+            energyRequiredToBreed = parameters.getStartEnergy() / 2;
             JFrame menuFrame = new JFrame();
             menuFrame.setPreferredSize(new Dimension(1000,1000));
             menuFrame.pack();

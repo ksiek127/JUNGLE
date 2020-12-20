@@ -12,7 +12,7 @@ public class Animal extends AbstractMapElement implements IMapElement{
     private Boolean canBreed; //czy moze sie rozmnazac, aktualizowane codziennie po jedzeniu
     private int age;
     private int nrOfChildren;
-    private int nrOfDescendientes;
+    private int nrOfDescendants;
     private Animal mom;
     private Animal dad;
 
@@ -29,8 +29,48 @@ public class Animal extends AbstractMapElement implements IMapElement{
         this.isEnvironmentElement = false;
         age = 0;
         nrOfChildren = 0;
-        nrOfDescendientes = 0;
+        nrOfDescendants = 0;
         canBreed = energy >= World.getEnergyRequiredToBreed() / 2;
+    }
+
+    public boolean getIsDead() {
+        return isDead;
+    }
+
+    public int getEnergy() {
+        return energy;
+    }
+
+    public void checkIfCanCanBreed(){ //sprawdzam, czy zwierze moze sie rozmnazac tego dnia
+        canBreed = energy >= World.getEnergyRequiredToBreed();
+    }
+
+    public void setCanBreed(Boolean canBreed){
+        this.canBreed = canBreed;
+    }
+
+    public Boolean getCanBreed() {
+        return canBreed;
+    }
+
+    public byte[] getGenes() {
+        return genes;
+    }
+
+    public void setPosition(Vector2D position) {
+        this.position = position;
+    }
+
+    public int getNrOfChildren() {
+        return nrOfChildren;
+    }
+
+    public int getNrOfDescendants() {
+        return nrOfDescendants;
+    }
+
+    public int getAge() {
+        return age;
     }
 
     private void changeOrientation(){ //zmiana orientacji na podstawie genow
@@ -67,14 +107,6 @@ public class Animal extends AbstractMapElement implements IMapElement{
         energy -= amount;
         if(energy <= 0) //zwierze ginie
             this.isDead = true;
-    }
-
-    public boolean getIsDead() {
-        return isDead;
-    }
-
-    public int getEnergy() {
-        return energy;
     }
 
     public void update(int cost){ //wykonanie akcji zwiazanych z koncem dnia
@@ -150,27 +182,9 @@ public class Animal extends AbstractMapElement implements IMapElement{
         return baby;
     }
 
-    public void checkIfCanCanBreed(){ //sprawdzam, czy zwierze moze sie rozmnazac tego dnia
-        canBreed = energy >= World.getEnergyRequiredToBreed();
-    }
-
-    public void setCanBreed(Boolean canBreed){
-        this.canBreed = canBreed;
-    }
-
-    public Boolean getCanBreed() {
-        return canBreed;
-    }
-
-    public byte[] getGenes() {
-        return genes;
-    }
-
-    public void setPosition(Vector2D position) {
-        this.position = position;
-    }
-
     public Color getColor(){ //kolor zwierzecia zalezy od ilosci energii
+        if(hasDominatingGenotype((byte) map.getDominatingGenotype()) && map.getHighlightDominatingGenotype().get())
+            return new Color(0,0,255);
         if(energy > 900)
             return new Color(0,0,0);
         if(energy > 700)
@@ -182,12 +196,8 @@ public class Animal extends AbstractMapElement implements IMapElement{
         return new Color(219,112,147);
     }
 
-    public int getAge() {
-        return age;
-    }
-
     public void addDescendant(){
-        nrOfDescendientes++;
+        nrOfDescendants++;
         if(mom != null)
             mom.addDescendant();
         if(dad != null)
@@ -199,7 +209,24 @@ public class Animal extends AbstractMapElement implements IMapElement{
         addDescendant();
     }
 
-    public int getNrOfChildren() {
-        return nrOfChildren;
+    public boolean hasDominatingGenotype(byte dominating){
+        byte mainGene = 0;
+        int maxGeneOccurrences = 1;
+        int currentGeneOccurrences = 1;
+        boolean hasDominatingGene = true; //jesli dane zwierze ma 'remis' jesli chodzi o gen, ktorego ma najwiecej, to nie ma dominujacego genu
+        for(int i=1; i<genes.length; i++){
+            if(genes[i-1] == genes[i]){
+                currentGeneOccurrences++;
+            }else{
+                if(currentGeneOccurrences > maxGeneOccurrences){
+                    maxGeneOccurrences = currentGeneOccurrences;
+                    mainGene = genes[i - 1];
+                    hasDominatingGene = true;
+                }else if(currentGeneOccurrences == maxGeneOccurrences){
+                    hasDominatingGene = false;
+                }
+            }
+        }
+        return hasDominatingGene && mainGene == dominating;
     }
 }
