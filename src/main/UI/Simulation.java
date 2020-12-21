@@ -4,8 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.Random;
 
 public class Simulation implements ActionListener {
@@ -29,13 +27,13 @@ public class Simulation implements ActionListener {
         this.timer = new Timer(delay, this);
         frame = new JFrame("JUNGLE");
         frame.setLayout(null);
-        statsPanel = new StatsPanel(map, statsPanelPosition);
+        statsPanel = new StatsPanel(map);
         statsPanel.setLayout(null);
         statsPanel.setSize(map.getWidth() * scale, 350);
         frame.setSize(map.getWidth() * scale, map.getHeight() * scale);
         frame.setLocation(location.getX(), location.getY());
         frame.setVisible(true);
-        displayPanel = new DisplayPanel(map, this, scale);
+        displayPanel = new DisplayPanel(map, scale);
         displayPanel.setSize(new Dimension(1,1));
         frame.add(displayPanel);
         statsFrame = new JFrame("STATS");
@@ -90,6 +88,14 @@ public class Simulation implements ActionListener {
             //dodanie nowych roslin do mapy
             map.spawnPlants();
             map.updateEra(); //nowa epoka
+            ArrayList<Integer> currentStats = new ArrayList<>();
+            currentStats.add(map.getAnimalsList().size());
+            currentStats.add(map.getEnvironmentElementsList().size());
+            currentStats.add(map.getDominatingGenotype());
+            currentStats.add(map.getAverageEnergyLevel());
+            currentStats.add(map.getAverageLongevityForDeadAnimals());
+            currentStats.add(map.getAverageNrOfChildrenForAliveAnimals());
+            map.updateStats(currentStats);
         }
     }
 

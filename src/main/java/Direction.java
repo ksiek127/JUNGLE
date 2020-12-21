@@ -1,5 +1,3 @@
-import java.util.Map;
-
 public enum Direction {
     NORTH,
     NORTHEAST,

@@ -38,4 +38,15 @@ public class Vector2D {
     public boolean equals(Vector2D other){
         return this.x == other.getX() && this.y == other.getY();
     }
+
+    public void translateLocationIfOutOfMap(WorldMap map){
+        if(x < 0)
+            x = map.getWidth() - 1;
+        if(x >= map.getWidth())
+            x = 0;
+        if(y < 0)
+            y = map.getHeight() - 1;
+        if(y >= map.getHeight())
+            y = 0;
+    }
 }

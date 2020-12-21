@@ -4,7 +4,7 @@ import java.awt.*;
 public class StatsPanel extends JPanel {
     private final WorldMap map;
 
-    public StatsPanel(WorldMap map, Vector2D position){
+    public StatsPanel(WorldMap map){
         this.map = map;
     }
 

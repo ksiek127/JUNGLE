@@ -2,8 +2,8 @@
   "width": 50,
   "height": 50,
   "startEnergy": 500,
-  "moveEnergy": 2,
-  "plantEnergy": 100,
+  "moveEnergy": 4,
+  "plantEnergy": 50,
   "jungleRatio": 0.5,
   "nrOfAnimalsInTheBeginning": 10,
   "delay": 50

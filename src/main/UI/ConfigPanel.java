@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConfigPanel extends JPanel implements ActionListener {
     private final JTextField startEnergy; //poczatkowa energia zwierzat, ktore pojawiaja sie na mapie na poczatku
@@ -10,6 +9,8 @@ public class ConfigPanel extends JPanel implements ActionListener {
     private final JTextField plantEnergy; //energia uzyskana po zjedzeniu rosliny
     private final JTextField nrOfAnimalsInTheBeginning; //ilosc zwierzat na poczatku
     private final JTextField delay; //przerwa miedzy kolejnymi dniami
+    private final JTextField leftStatsUntilWhen;
+    private final JTextField rightStatsUntilWhen;
 
     private final Vector2D mapPosition;
     private final Vector2D secondMapPosition;
@@ -23,6 +24,8 @@ public class ConfigPanel extends JPanel implements ActionListener {
     private final JButton pauseRightSimulation;
     private final JButton highlightAnimalsWithDominatingGenotypeOnTheLeftMap;
     private final JButton highlightAnimalsWithDominatingGenotypeOnTheRightMap;
+    private final JButton getLeftStats;
+    private final JButton getRightStats;
 
     public ConfigPanel(LoadJson parameters){
         JLabel widthLabel = new JLabel("Width: "); //inicjalizacja podpisow
@@ -33,6 +36,8 @@ public class ConfigPanel extends JPanel implements ActionListener {
         JLabel jungleRatioLabel = new JLabel("Jungle to steppe ratio: ");
         JLabel nrOfAnimalsInTheBeginningLabel = new JLabel("Number of animals in the beginning: ");
         JLabel delayLabel = new JLabel("Time between displaying the next day [ms]: ");
+        JLabel leftStatsLabel = new JLabel("Until which era shall the statistics for the left map be printed? ");
+        JLabel rightStatsLabel = new JLabel("Until which era shall the statistics for the right map be printed? ");
         //szerokosc mapy
         JTextField width = new JTextField(); //inicjalizacja pol
         //wysokosc mapy
@@ -44,6 +49,8 @@ public class ConfigPanel extends JPanel implements ActionListener {
         JTextField jungleRatio = new JTextField();
         nrOfAnimalsInTheBeginning = new JTextField();
         delay = new JTextField();
+        leftStatsUntilWhen = new JTextField();
+        rightStatsUntilWhen = new JTextField();
         width.setText(String.valueOf(parameters.getWidth()));
         height.setText(String.valueOf(parameters.getHeight()));
         startEnergy.setText(String.valueOf(parameters.getStartEnergy()));
@@ -52,6 +59,8 @@ public class ConfigPanel extends JPanel implements ActionListener {
         jungleRatio.setText(String.valueOf(parameters.getJungleRatio()));
         nrOfAnimalsInTheBeginning.setText(String.valueOf(parameters.getNrOfAnimalsInTheBeginning()));
         delay.setText(String.valueOf(parameters.getDelay()));
+        leftStatsUntilWhen.setText(String.valueOf(1));
+        rightStatsUntilWhen.setText(String.valueOf(1));
         widthLabel.setLabelFor(width);
         heightLabel.setLabelFor(height);
         startEnergyLabel.setLabelFor(startEnergy);
@@ -60,18 +69,26 @@ public class ConfigPanel extends JPanel implements ActionListener {
         jungleRatioLabel.setLabelFor(jungleRatio);
         nrOfAnimalsInTheBeginningLabel.setLabelFor(nrOfAnimalsInTheBeginning);
         delayLabel.setLabelFor(delay);
+        leftStatsLabel.setLabelFor(leftStatsUntilWhen);
+        rightStatsLabel.setLabelFor(rightStatsUntilWhen);
         JButton start = new JButton("Start the simulations");
         pauseLeftSimulation = new JButton("Pause left simulation");
         pauseRightSimulation = new JButton("Pause right simulation");
         highlightAnimalsWithDominatingGenotypeOnTheLeftMap = new JButton("Highlight animals with dominating genotype on the left map");
         highlightAnimalsWithDominatingGenotypeOnTheRightMap = new JButton("Highlight animals with dominating genotype on the right map");
+
+        getLeftStats = new JButton("Get left map's stats as txt file");
+        getRightStats = new JButton("Get right map's stats as txt file");
         start.addActionListener(this);
 
-        mapPosition = new Vector2D(150, 200);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = (int) screenSize.getWidth();
+        int screenHeight = (int) screenSize.getHeight();
+        scale = Integer.parseInt(width.getText()) / 10;
+        mapPosition = new Vector2D(screenWidth / 2 - 500 - (Integer.parseInt(height.getText()) * scale), 300 + screenHeight / 2 - 500 - Integer.parseInt(height.getText()));
         map = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
-        secondMapPosition = new Vector2D(800, 200);
+        secondMapPosition = new Vector2D(screenWidth / 2 + 500, 300 + screenHeight / 2 - 500 - Integer.parseInt(height.getText()));
         secondMap = new WorldMap(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Double.parseDouble(jungleRatio.getText()), Integer.parseInt(plantEnergy.getText()));
-        scale = map.getWidth() / 10;
         statsPanelPosition = new Vector2D(mapPosition.getX(), mapPosition.getY() + Integer.parseInt(height.getText()) * scale);
         secondStatsPanelPosition = new Vector2D(secondMapPosition.getX(), secondMapPosition.getY() + Integer.parseInt(height.getText()) * scale);
 
@@ -129,6 +146,20 @@ public class ConfigPanel extends JPanel implements ActionListener {
             }
         });
 
+        getLeftStats.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                map.getAverageStats(Integer.parseInt(leftStatsUntilWhen.getText()));
+            }
+        });
+
+        getRightStats.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                secondMap.getAverageStats(Integer.parseInt(rightStatsUntilWhen.getText()));
+            }
+        });
+
         setPreferredSize(new Dimension(getWidth(), getHeight()));
         width.setColumns(8);
         height.setColumns(8);
@@ -138,6 +169,8 @@ public class ConfigPanel extends JPanel implements ActionListener {
         jungleRatio.setColumns(8);
         nrOfAnimalsInTheBeginning.setColumns(8);
         delay.setColumns(8);
+        leftStatsUntilWhen.setColumns(8);
+        rightStatsUntilWhen.setColumns(8);
         JPanel widthPanel = new JPanel();
         JPanel heightPanel = new JPanel();
         JPanel startEnergyPanel = new JPanel();
@@ -185,6 +218,12 @@ public class ConfigPanel extends JPanel implements ActionListener {
         add(rightPausePanel);
         add(leftHighlightPanel);
         add(rightHighlightPanel);
+        add(leftStatsLabel);
+        add(leftStatsUntilWhen);
+        add(getLeftStats);
+        add(rightStatsLabel);
+        add(rightStatsUntilWhen);
+        add(getRightStats);
     }
 
     @Override

@@ -1,12 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class DisplayPanel extends JPanel {
     private final WorldMap map; //mapa swiata
     private final int scale;
 
-    public DisplayPanel(WorldMap map, Simulation simulation, int scale){
+    public DisplayPanel(WorldMap map, int scale){
         this.map = map;
         this.scale = scale;
     }

@@ -14,21 +14,6 @@ class WorldMapTest {
     }
 
     @org.junit.jupiter.api.Test
-    void isFreeSpaceInTheJungleShouldReturnFalseIfThereIsNoFreeSpaceInTheJungle() {
-        WorldMap testMap = new WorldMap(4,4,0.5,2);
-        byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};
-        Animal experimentalRabbit1 = new Animal(testMap, new Vector2D(1,1), genes, 30);
-        Animal experimentalRabbit2 = new Animal(testMap, new Vector2D(1,2), genes, 30);
-        Animal experimentalRabbit3 = new Animal(testMap, new Vector2D(2,1), genes, 30);
-        Animal experimentalRabbit4 = new Animal(testMap, new Vector2D(2,2), genes, 30);
-        testMap.placeMapElement(experimentalRabbit1);
-        testMap.placeMapElement(experimentalRabbit2);
-        testMap.placeMapElement(experimentalRabbit3);
-        testMap.placeMapElement(experimentalRabbit4);
-        assertFalse(testMap.isFreeSpaceInTheJungle());
-    }
-
-    @org.junit.jupiter.api.Test
     void isAnyAdjacentPositionFreeShouldReturnTrueIfThereIsAFreeAdjacentPosition() {
         WorldMap testMap = new WorldMap(4,4,0.5,2);
         byte[] genes = new byte[]{1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,3,2,3,2,1,2,3,4,5,6,7,0};

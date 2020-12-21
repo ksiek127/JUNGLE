@@ -1,11 +1,4 @@
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Random;
-
-import org.json.simple.JSONObject;
-
 import javax.swing.*;
 
 public class World {

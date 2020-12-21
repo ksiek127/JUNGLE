@@ -80,21 +80,10 @@ public class Animal extends AbstractMapElement implements IMapElement{
         orientation = Direction.intToDirection((orientation.directionToInt() + changeOrientation) % 8);
     }
 
-    public void translateLocationIfOutOfMap(){
-        if(position.getX() < 0)
-            position.setX(map.getWidth() - 1);
-        if(position.getX() >= map.getWidth())
-            position.setX(0);
-        if(position.getY() < 0)
-            position.setY(map.getHeight() - 1);
-        if(position.getY() >= map.getHeight())
-            position.setY(0);
-    }
-
     private void move(int cost){ //wykonanie pojedynczego ruchu
         Vector2D prevPosition = position;
-        this.position = this.position.add(this.orientation.toUnitVector());
-        translateLocationIfOutOfMap();
+        position = position.add(orientation.toUnitVector());
+        position.translateLocationIfOutOfMap(map);
         loseEnergy(cost); //utrata energii zuzytej na poruszanie
         map.moveAnimal(this, prevPosition);
     }
@@ -143,6 +132,15 @@ public class Animal extends AbstractMapElement implements IMapElement{
         Arrays.sort(genes);
     }
 
+    private static Vector2D drawPositionToSpawn(Vector2D parentPosition, WorldMap map){
+        Random random = new Random();
+        int positionX = random.nextInt(3) + parentPosition.getX() - 1;
+        int positionY = random.nextInt(3) + parentPosition.getY() - 1;
+        Vector2D babyPosition = new Vector2D(positionX, positionY);
+        babyPosition.translateLocationIfOutOfMap(map);
+        return babyPosition;
+    }
+
     public Animal reproduce(Animal other){
         Random random = new Random();
         int split1 = random.nextInt(genes.length - 2); //losowy podzial genow rodzicow na trzy czesci
@@ -152,23 +150,18 @@ public class Animal extends AbstractMapElement implements IMapElement{
         System.arraycopy(this.genes, 0, babyGenes, 0, split1);
         System.arraycopy(this.genes, split1, babyGenes, split1, split2 - split1);
         System.arraycopy(other.genes, split2, babyGenes, split2, genes.length - split2);
-        int babyX = random.nextInt(3) + position.getX() - 1;
-        int babyY = random.nextInt(3) + position.getY() - 1;
-        Vector2D babyPosition = new Vector2D(babyX, babyY);
+        Vector2D babyPosition = drawPositionToSpawn(position, map);
         int babyEnergy = this.energy / 4 + other.energy / 4; //dziecko dostaje energie od rodzicow
         this.loseEnergy(this.energy / 4); //rodzice traca energie na rzecz dziecka
         other.loseEnergy(other.energy / 4);
         Animal baby = new Animal(map, babyPosition, babyGenes, babyEnergy);
         if(map.isAnyAdjacentPositionFree(position)){
             while (map.isOccupiedByLivingEntity(babyPosition)){ //losowanie dopoki wylosuje sie wolne pole
-                babyPosition.setX(random.nextInt(3) + position.getX() - 1);
-                babyPosition.setY(random.nextInt(3) + position.getY() - 1);
-                baby.translateLocationIfOutOfMap();
+                baby.setPosition(drawPositionToSpawn(position, map));
             }
         }else{
             while (babyPosition.getX() == position.getX() && babyPosition.getY() == position.getY()){ //dziecko nie moze sie pojawic na tym samym polu, na ktorym stoja jego rodzice
-                babyPosition.setX(random.nextInt(3) + position.getX() - 1);
-                babyPosition.setY(random.nextInt(3) + position.getY() - 1);
+                baby.setPosition(drawPositionToSpawn(position, map));
             }
         }
         baby.setPosition(babyPosition);

@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -17,6 +20,7 @@ public class WorldMap implements IWorldMap{
     private int era;
     private final AtomicBoolean paused;
     private final AtomicBoolean highlightDominatingGenotype;
+    private final ArrayList<ArrayList<Integer>> stats = new ArrayList<>();
 
     public WorldMap(int width, int height, double jungleRatio, int plantEnergy) {
         this.width = width;
@@ -69,10 +73,6 @@ public class WorldMap implements IWorldMap{
 
     public boolean isFreeSpaceInTheSteppe(){ //czy jest wolne miejsce na stepie
         return isFreeSpaceInTheArea(new Vector2D(0,0), new Vector2D(jgBottomLeft.getX(), height)) || isFreeSpaceInTheArea(new Vector2D(jgTopRight.getX(), 0), new Vector2D(width, height)) || isFreeSpaceInTheArea(new Vector2D(jgBottomLeft.getX(), jgTopRight.getY()), new Vector2D(jgTopRight.getX(), height)) || isFreeSpaceInTheArea(new Vector2D(jgBottomLeft.getX(), 0), new Vector2D(jgTopRight.getX(), jgBottomLeft.getY()));
-    }
-
-    public boolean isFreeSpaceOnTheMap(){
-        return grassObserver.isFreeSpace();
     }
 
     private void updateDeadAnimalsLongevity(Animal animal){
@@ -247,17 +247,18 @@ public class WorldMap implements IWorldMap{
         }
     }
 
+    private Vector2D drawPlantPosition(){
+        Random random = new Random();
+        int plantX = random.nextInt(width);
+        int plantY = random.nextInt(height);
+        return new Vector2D(plantX, plantY);
+    }
+
     public void spawnPlants(){
         if(isFreeSpaceInTheSteppe()){ //jesli jest wolne miejsce na stepie, pojawia sie tam roslina
-            Random random = new Random();
-            int plantX = random.nextInt(width);
-            int plantY = random.nextInt(height);
-            Vector2D plantPos = new Vector2D(plantX, plantY);
+            Vector2D plantPos = drawPlantPosition();
             while(isPositionInsideTheJungle(plantPos) || isOccupied(plantPos)){ //szukam wolnego miejsca na stepie
-                plantX = random.nextInt(width);
-                plantY = random.nextInt(height);
-                plantPos.setX(plantX);
-                plantPos.setY(plantY);
+                plantPos = drawPlantPosition();
             }
             IMapElement plant = new Plant(plantPos); //umieszczam rosline na mapie
             placeMapElement(plant);
@@ -296,7 +297,6 @@ public class WorldMap implements IWorldMap{
     }
 
     public ArrayList<IMapElement> getEnvironmentElementsList() { //zwraca kopie roslin
-        //return (ArrayList<IMapElement>) environmentElements.values();
         return new ArrayList<IMapElement>(environmentElements.values());
     }
 
@@ -408,5 +408,48 @@ public class WorldMap implements IWorldMap{
 
     public AtomicBoolean getHighlightDominatingGenotype() {
         return highlightDominatingGenotype;
+    }
+
+    public void updateStats(ArrayList<Integer> newStats){
+        stats.add(newStats);
+    }
+
+    public void getAverageStats(int untilWhen){
+        int totalNrOfAliveAnimals = 0;
+        int totalNrOfPlantsOnTheMap = 0;
+        int totalDominatingGenotype = 0;
+        int totalAnimalsEnergyLevel = 0;
+        int totalLongevity = 0;
+        int totalNrOfChildren = 0;
+        for(int i=0; i<untilWhen; i++){
+            ArrayList<Integer> currentEraStats = stats.get(i);
+            totalNrOfAliveAnimals += currentEraStats.get(0);
+            totalNrOfPlantsOnTheMap += currentEraStats.get(1);
+            totalDominatingGenotype += currentEraStats.get(2);
+            totalAnimalsEnergyLevel += currentEraStats.get(3);
+            totalLongevity += currentEraStats.get(4);
+            totalNrOfChildren += currentEraStats.get(5);
+        }
+
+        int avgNrOfAliveAnimals = totalNrOfAliveAnimals / untilWhen;
+        int avgNrOfPlantsOnTheMap = totalNrOfPlantsOnTheMap / untilWhen;
+        int avgDominatingGenotype = totalDominatingGenotype / untilWhen;
+        int avgAnimalsEnergyLevel = totalAnimalsEnergyLevel / untilWhen;
+        int avgLongevity = totalLongevity / untilWhen;
+        int avgNrOfChildren = totalNrOfChildren / untilWhen;
+        try{
+            File file = new File("stats.txt");
+            FileWriter writer = new FileWriter("stats.txt");
+            writer.write("Stats until era " + untilWhen + "\n");
+            writer.write("Average nr of alive animals: " + avgNrOfAliveAnimals + "\n");
+            writer.write("Average nr of plants on the map: " + avgNrOfPlantsOnTheMap + "\n");
+            writer.write("Average dominating genotype: " + avgDominatingGenotype + "\n");
+            writer.write("Average animal's' energy level: " + avgAnimalsEnergyLevel + "\n");
+            writer.write("Average longevity: " + avgLongevity + "\n");
+            writer.write("Average number of children: " + avgNrOfChildren + "\n");
+            writer.close();
+        }catch (IOException e){
+            System.out.println("Error while making the stats file");
+        }
     }
 }

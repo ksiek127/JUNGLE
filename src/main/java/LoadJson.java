@@ -12,6 +12,9 @@ public class LoadJson {
     private int nrOfAnimalsInTheBeginning;
     private int delay;
 
+    public LoadJson() {
+    }
+
     public static LoadJson loadParameters() {
         Gson gson = new Gson();
         LoadJson parameters = new LoadJson();
